@@ -51,4 +51,12 @@ class AuthController extends Controller
         // Return the currently authenticated user's data as JSON
         return response()->json(auth()->user());
     }
+
+    public function logout() {
+        // Invalidate the current user's JWT token (logout)
+        auth()->logout();
+    
+        // Return a success message as JSON
+        return response()->json(['message' => 'Logged out']);
+    }
 }
