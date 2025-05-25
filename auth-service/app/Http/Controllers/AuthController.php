@@ -46,4 +46,9 @@ class AuthController extends Controller
         // If authentication is successful, return the JWT token in the response
         return response()->json(compact('token'));
     }
+
+    public function me() {
+        // Return the currently authenticated user's data as JSON
+        return response()->json(auth()->user());
+    }
 }
