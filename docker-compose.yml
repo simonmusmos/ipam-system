@@ -21,6 +21,15 @@ services:
     ports:
       - "33061:3306"
 
+  auth-test-db:
+    image: mysql:8.0
+    container_name: auth-test-db
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: auth_test_db
+    ports:
+      - "33063:3306"
+
   ip-service:
     build:
       context: ./ip-management-service
