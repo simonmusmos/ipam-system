@@ -32,4 +32,18 @@ class AuthController extends Controller
         // Return the user and token as a JSON response
         return response()->json(compact('user','token'));
     }
+
+    public function login(Request $request) {
+        // Retrieve only the email and password from the request
+        $credentials = $request->only('email', 'password');
+    
+        // Attempt to authenticate the user using the credentials
+        // If authentication fails, return an "Unauthorized" response
+        if (!$token = JWTAuth::attempt($credentials)) {
+            return response()->json(['error' => 'Unauthorized'], 401);
+        }
+    
+        // If authentication is successful, return the JWT token in the response
+        return response()->json(compact('token'));
+    }
 }
