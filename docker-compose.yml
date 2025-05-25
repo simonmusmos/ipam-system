@@ -1,0 +1,51 @@
+version: '3.8'
+
+services:
+  auth-service:
+    build:
+      context: ./auth-service
+    container_name: auth-service
+    ports:
+      - "8001:8000"
+    volumes:
+      - ./auth-service:/var/www
+    depends_on:
+      - auth-db
+
+  auth-db:
+    image: mysql:8.0
+    container_name: auth-db
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: auth_db
+    ports:
+      - "33061:3306"
+
+  ip-service:
+    build:
+      context: ./ip-management-service
+    container_name: ip-service
+    ports:
+      - "8002:8000"
+    volumes:
+      - ./ip-management-service:/var/www
+    depends_on:
+      - ip-db
+
+  ip-db:
+    image: mysql:8.0
+    container_name: ip-db
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: ip_db
+    ports:
+      - "33062:3306"
+
+  gateway-service:
+    build:
+      context: ./gateway-service
+    container_name: gateway-service
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./gateway-service:/var/www
