@@ -27,7 +27,7 @@ class AuthController extends Controller
         ]);
     
         // Generate a JWT token for the newly created user
-        $token = JWTAuth::fromUser($user);
+        $token = JWTAuth::claims(['role' => $user->role->name])->fromUser($user);
     
         // Return the user and token as a JSON response
         return response()->json(compact('user','token'));
@@ -42,6 +42,13 @@ class AuthController extends Controller
         if (!$token = JWTAuth::attempt($credentials)) {
             return response()->json(['error' => 'Unauthorized'], 401);
         }
+
+        // Get the authenticated user
+        $user = auth()->user();
+
+        $token = JWTAuth::claims([
+            'role' => $user->role->name,
+        ])->fromUser($user);
     
         // If authentication is successful, return the JWT token in the response
         return response()->json(compact('token'));
