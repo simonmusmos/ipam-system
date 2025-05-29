@@ -19,4 +19,5 @@ Route::middleware('jwt')->group(function () {
     Route::post('/ip-addresses', [IpAddressController::class, 'store']);
     Route::get('/ip-addresses', [IpAddressController::class, 'index']);
     Route::get('/ip-addresses/{id}', [IpAddressController::class, 'getDetails']);
+    Route::put('/ip-addresses/{id}', [IpAddressController::class, 'update']);
 });

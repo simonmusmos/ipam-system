@@ -37,4 +37,19 @@ class IpAddressController extends Controller
 
         return response()->json($ip, 201);
     }
+
+    public function update(Request $request, IpAddress $id)
+    {
+        $request->validate([
+            'label' => 'required|string|max:255',
+            'comment' => 'nullable|string',
+        ]);
+
+        try {
+            $ip = $this->ipService->update($request, $id);
+            return response()->json($ip);
+        } catch (\Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 403);
+        }
+    }
 }

@@ -35,4 +35,18 @@ class IpAddressService
     {
         return $address;
     }
+
+    public function update(Request $request, $address)
+    {
+        if ($address->user_id !== $request->user_id && $request->role !== 'super-admin') {
+            throw new \Exception('Unauthorized');
+        }
+
+        $address->update([
+            'label' => $request->label,
+            'comment' => $request->comment ?? null,
+        ]);
+
+        return $address;
+    }
 }
