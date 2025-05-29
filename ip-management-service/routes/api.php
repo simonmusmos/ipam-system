@@ -17,4 +17,5 @@ use App\Http\Controllers\IpAddressController;
 
 Route::middleware('jwt')->group(function () {
     Route::post('/ip-addresses', [IpAddressController::class, 'store']);
+    Route::get('/ip-addresses', [IpAddressController::class, 'index']);
 });

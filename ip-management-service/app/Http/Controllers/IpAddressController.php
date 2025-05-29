@@ -15,6 +15,11 @@ class IpAddressController extends Controller
         $this->ipService = $ipService;
     }
 
+    public function index(Request $request)
+    {
+        return $this->ipService->get($request);
+    }
+
     public function store(Request $request)
     {
         $request->validate([
