@@ -30,4 +30,9 @@ class IpAddressService
 
         return $query->paginate($perPage);
     }
+
+    public function getDetails(IpAddress $address)
+    {
+        return $address;
+    }
 }

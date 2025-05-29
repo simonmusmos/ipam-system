@@ -20,6 +20,11 @@ class IpAddressController extends Controller
         return $this->ipService->get($request);
     }
 
+    public function getDetails(IpAddress $id)
+    {
+        return $this->ipService->getDetails($id);
+    }
+
     public function store(Request $request)
     {
         $request->validate([
