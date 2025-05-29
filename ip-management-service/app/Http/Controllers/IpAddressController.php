@@ -52,4 +52,14 @@ class IpAddressController extends Controller
             return response()->json(['error' => $e->getMessage()], 403);
         }
     }
+
+    public function destroy(Request $request, IpAddress $id)
+    {
+        try {
+            $this->ipService->delete($request, $id);
+            return response()->json(['message' => 'Deleted']);
+        } catch (\Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 403);
+        }
+    }
 }

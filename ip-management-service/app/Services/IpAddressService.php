@@ -36,9 +36,9 @@ class IpAddressService
         return $address;
     }
 
-    public function update(Request $request, $address)
+    public function update(Request $request, IpAddress $address)
     {
-        if ($address->user_id !== $request->user_id && $request->role !== 'super-admin') {
+        if ($address->user_id !== $request->user_id && $request->role !== 'superadmin') {
             throw new \Exception('Unauthorized');
         }
 
@@ -48,5 +48,13 @@ class IpAddressService
         ]);
 
         return $address;
+    }
+
+    public function delete(Request $request, IpAddress $address)
+    {
+        if ($request->role !== 'superadmin') {
+            throw new \Exception('Unauthorized');
+        }
+        $address->delete();
     }
 }

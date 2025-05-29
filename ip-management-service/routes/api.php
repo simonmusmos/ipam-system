@@ -20,4 +20,5 @@ Route::middleware('jwt')->group(function () {
     Route::get('/ip-addresses', [IpAddressController::class, 'index']);
     Route::get('/ip-addresses/{id}', [IpAddressController::class, 'getDetails']);
     Route::put('/ip-addresses/{id}', [IpAddressController::class, 'update']);
+    Route::delete('/ip-addresses/{id}', [IpAddressController::class, 'destroy']);
 });
