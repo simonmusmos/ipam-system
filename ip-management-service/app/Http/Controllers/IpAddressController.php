@@ -20,9 +20,9 @@ class IpAddressController extends Controller
         return $this->ipService->get($request);
     }
 
-    public function getDetails(IpAddress $id)
+    public function getDetails(IpAddress $ip)
     {
-        return $this->ipService->getDetails($id);
+        return response()->json($this->ipService->getDetails($ip), 200);
     }
 
     public function store(Request $request)
@@ -38,7 +38,7 @@ class IpAddressController extends Controller
         return response()->json($ip, 201);
     }
 
-    public function update(Request $request, IpAddress $id)
+    public function update(Request $request, IpAddress $ip)
     {
         $request->validate([
             'label' => 'required|string|max:255',
@@ -46,17 +46,17 @@ class IpAddressController extends Controller
         ]);
 
         try {
-            $ip = $this->ipService->update($request, $id);
+            $ip = $this->ipService->update($request, $ip);
             return response()->json($ip);
         } catch (\Exception $e) {
             return response()->json(['error' => $e->getMessage()], 403);
         }
     }
 
-    public function destroy(Request $request, IpAddress $id)
+    public function destroy(Request $request, IpAddress $ip)
     {
         try {
-            $this->ipService->delete($request, $id);
+            $this->ipService->delete($request, $ip);
             return response()->json(['message' => 'Deleted']);
         } catch (\Exception $e) {
             return response()->json(['error' => $e->getMessage()], 403);

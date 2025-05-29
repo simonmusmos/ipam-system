@@ -50,6 +50,15 @@ services:
     ports:
       - "33062:3306"
 
+  ip-test-db:
+    image: mysql:8.0
+    container_name: auth-test-db
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: auth_test_db
+    ports:
+      - "33063:3306"
+
   gateway-service:
     build:
       context: ./gateway-service

@@ -18,7 +18,7 @@ use App\Http\Controllers\IpAddressController;
 Route::middleware('jwt')->group(function () {
     Route::post('/ip-addresses', [IpAddressController::class, 'store']);
     Route::get('/ip-addresses', [IpAddressController::class, 'index']);
-    Route::get('/ip-addresses/{id}', [IpAddressController::class, 'getDetails']);
-    Route::put('/ip-addresses/{id}', [IpAddressController::class, 'update']);
-    Route::delete('/ip-addresses/{id}', [IpAddressController::class, 'destroy']);
+    Route::get('/ip-addresses/{ip}', [IpAddressController::class, 'getDetails']);
+    Route::put('/ip-addresses/{ip}', [IpAddressController::class, 'update']);
+    Route::delete('/ip-addresses/{ip}', [IpAddressController::class, 'destroy']);
 });
