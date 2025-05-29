@@ -4,16 +4,11 @@ namespace App\Http\Middleware;
 
 use Closure;
 use Illuminate\Http\Request;
-use Symfony\Component\HttpFoundation\Response;
+use Illuminate\Support\Facades\Http;
 
 class JwtMiddleware
 {
-    /**
-     * Handle an incoming request.
-     *
-     * @param  \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response)  $next
-     */
-    public function handle(Request $request, Closure $next): Response
+    public function handle(Request $request, Closure $next)
     {
         $authHeader = $request->header('Authorization');
 
@@ -22,26 +17,24 @@ class JwtMiddleware
         }
 
         $token = str_replace('Bearer ', '', $authHeader);
-        // dd($token);
+
         try {
-            $parts = explode('.', $token);
-            if (count($parts) !== 3) {
-                throw new \Exception('Malformed token.');
+            // Call auth-service to validate token
+            $response = Http::withToken($token)->get('http://auth-service:8000/api/validate-token');
+
+            if ($response->status() !== 200) {
+                return response()->json(['error' => 'Token is invalid or expired.'], 401);
             }
 
-            $payload = json_decode(base64_decode($parts[1]), true);
+            $userData = $response->json();
 
-            if (!$payload || !isset($payload['sub'], $payload['role'])) {
-                throw new \Exception('Invalid token payload.');
-            }
-
-            // Attach decoded values to the request
+            // Attach user data to request
             $request->merge([
-                'user_id' => $payload['sub'],
-                'role' => $payload['role'],
+                'user_id' => $userData['user_id'],
+                'role' => $userData['role'],
             ]);
         } catch (\Exception $e) {
-            return response()->json(['error' => 'Invalid token. ' . $e->getMessage()], 401);
+            return response()->json(['error' => 'Token validation failed. ' . $e->getMessage()], 500);
         }
 
         return $next($request);

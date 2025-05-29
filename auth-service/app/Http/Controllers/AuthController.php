@@ -71,4 +71,17 @@ class AuthController extends Controller
         // Refresh the current JWT token and return a new one in the response
         return response()->json(['token' => auth()->refresh()]);
     }
+
+    public function validateToken() {
+        try {
+            $user = auth()->user();
+            return response()->json([
+                'valid' => true,
+                'user_id' => $user->id,
+                'role' => $user->role->name,
+            ]);
+        } catch (\Exception $e) {
+            return response()->json(['error' => 'Token invalid'], 401);
+        }
+    }
 }
