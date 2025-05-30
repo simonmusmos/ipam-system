@@ -3,12 +3,15 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
+use App\Traits\AuditLogger;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Tymon\JWTAuth\Facades\JWTAuth;
 
 class AuthController extends Controller
 {
+    use AuditLogger;
+    
     public function register(Request $request) {
         // Validate the incoming request data
         $request->validate([
@@ -50,6 +53,9 @@ class AuthController extends Controller
             'role' => $user->role->name,
         ])->fromUser($user);
     
+        // Log login
+        $this->logAudit($request, 'login', 'auth', $user->id);
+
         // If authentication is successful, return the JWT token in the response
         return response()->json(compact('token'));
     }
@@ -59,7 +65,10 @@ class AuthController extends Controller
         return response()->json(auth()->user());
     }
 
-    public function logout() {
+    public function logout(Request $request) {
+        // Log logout
+        $this->logAudit($request, 'logout', 'auth', auth()->user()->id);
+
         // Invalidate the current user's JWT token (logout)
         auth()->logout();
     
