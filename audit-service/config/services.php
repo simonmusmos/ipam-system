@@ -31,4 +31,7 @@ return [
         'region' => env('AWS_DEFAULT_REGION', 'us-east-1'),
     ],
 
+    'audit' => [
+        'internal_key' => env('INTERNAL_AUDIT_KEY'),
+    ],
 ];
