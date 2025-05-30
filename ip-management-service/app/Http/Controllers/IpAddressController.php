@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\IpAddress;
 use App\Services\IpAddressService;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 
 class IpAddressController extends Controller
 {
@@ -28,12 +29,16 @@ class IpAddressController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'address' => 'required|ip|unique:ip_addresses,address',
+            'address' => [
+                'required',
+                'ip',
+                Rule::unique('ip_addresses', 'address')->whereNull('deleted_at'),
+            ],
             'label' => 'required|string|max:255',
             'comment' => 'nullable|string',
         ]);
 
-        $ip = $this->ipService->create($request->user_id, $request->all());
+        $ip = $this->ipService->create($request);
 
         return response()->json($ip, 201);
     }

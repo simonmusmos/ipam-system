@@ -14,4 +14,8 @@ use Illuminate\Support\Facades\Route;
 | be assigned to the "api" middleware group. Make something great!
 |
 */
-Route::middleware('internal')->post('/audit', [AuditLogController::class, 'store']);
+
+Route::middleware('internal')->group(function () {
+    Route::get('/audit', [AuthController::class, 'index']);
+    Route::post('/audit', [AuthController::class, 'store']);
+});

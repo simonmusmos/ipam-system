@@ -4,10 +4,11 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class IpAddress extends Model
 {
-    use HasFactory;
+    use HasFactory, SoftDeletes;
 
     public const ALLOWED_FILTERS = ['address', 'label'];
     public const ALLOWED_SORTS = ['created_at', 'label'];

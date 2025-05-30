@@ -3,18 +3,25 @@
 namespace App\Services;
 
 use App\Models\IpAddress;
+use App\Traits\AuditLogger;
 use Illuminate\Http\Request;
 
 class IpAddressService
 {
-    public function create($userId, array $data)
+    use AuditLogger;
+
+    public function create(Request $request)
     {
-        return IpAddress::create([
-            'user_id' => $userId,
-            'address' => $data['address'],
-            'label' => $data['label'],
-            'comment' => $data['comment'] ?? null,
+        $ip = IpAddress::create([
+            'user_id' => $request->user_id,
+            'address' => $request->address,
+            'label' => $request->label,
+            'comment' => $request->comment ?? null,
         ]);
+        
+        $this->logAudit($request, 'create', 'ip_address', $ip->id);
+        
+        return $ip;
     }
 
     public function get(Request $request)
@@ -47,6 +54,8 @@ class IpAddressService
             'comment' => $request->comment ?? null,
         ]);
 
+        $this->logAudit($request, 'update', 'ip_address', $address->id);
+
         return $address;
     }
 
@@ -55,6 +64,9 @@ class IpAddressService
         if ($request->role !== 'superadmin') {
             throw new \Exception('Unauthorized');
         }
+
+        $this->logAudit($request, 'delete', 'ip_address', $address->id);
+
         $address->delete();
     }
 }
