@@ -16,6 +16,6 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::middleware('internal')->group(function () {
-    Route::get('/audit', [AuthController::class, 'index']);
-    Route::post('/audit', [AuthController::class, 'store']);
+    Route::get('/audit', [AuditLogController::class, 'index']);
+    Route::post('/audit', [AuditLogController::class, 'store']);
 });
