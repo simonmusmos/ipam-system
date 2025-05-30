@@ -52,12 +52,12 @@ services:
 
   ip-test-db:
     image: mysql:8.0
-    container_name: auth-test-db
+    container_name: ip-test-db
     environment:
       MYSQL_ROOT_PASSWORD: root
-      MYSQL_DATABASE: auth_test_db
+      MYSQL_DATABASE: ip_test_db
     ports:
-      - "33063:3306"
+      - "33064:3306"
 
   gateway-service:
     build:
@@ -67,3 +67,23 @@ services:
       - "8000:8000"
     volumes:
       - ./gateway-service:/var/www
+
+  audit-service:
+    build:
+      context: ./audit-service
+    container_name: audit-service
+    ports:
+      - "8003:8000"
+    volumes:
+      - ./audit-service:/var/www
+    depends_on:
+      - audit-db
+
+  audit-db:
+    image: mysql:8.0
+    container_name: audit-db
+    ports:
+      - "33065:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: audit_db
