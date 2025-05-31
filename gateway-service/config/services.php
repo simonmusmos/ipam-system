@@ -31,4 +31,15 @@ return [
         'region' => env('AWS_DEFAULT_REGION', 'us-east-1'),
     ],
 
+    'auth' => [
+        'base_uri' => env('AUTH_SERVICE_URL'),
+    ],
+
+    'ip' => [
+        'base_uri' => env('IP_SERVICE_URL'),
+    ],
+    
+    'audit' => [
+        'base_uri' => env('AUDIT_SERVICE_URL'),
+    ],
 ];
