@@ -17,12 +17,16 @@ class ProxyAuthController extends Controller
 
     public function register(Request $request)
     {
-        return json_decode(Http::acceptJson()->post("{$this->baseUrl}/register", $request->all()));
+        $response = Http::acceptJson()->post("{$this->baseUrl}/register", $request->all());
+
+        return response($response->json(), $response->status());
     }
 
     public function login(Request $request)
     {
-        return json_decode(Http::acceptJson()->post("{$this->baseUrl}/login", $request->all()));
+        $response = Http::acceptJson()->post("{$this->baseUrl}/login", $request->all());
+        
+        return response($response->json(), $response->status());
     }
 
     public function me(Request $request)

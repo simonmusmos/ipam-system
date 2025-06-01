@@ -1,9 +1,12 @@
 <script setup>
-import { ref } from 'vue';
+import { ref, provide } from 'vue';
 import LoginForm from './components/LoginForm.vue';
 import RegisterForm from './components/RegisterForm.vue';
 
 const showLogin = ref(true);
+const registrationSuccess = ref(false)
+
+provide('registrationSuccess', registrationSuccess)
 
 const toggleForm = () => {
   showLogin.value = !showLogin.value;

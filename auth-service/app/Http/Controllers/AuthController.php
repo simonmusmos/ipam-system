@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Role;
 use App\Models\User;
 use App\Traits\AuditLogger;
 use Illuminate\Http\Request;
@@ -17,16 +18,17 @@ class AuthController extends Controller
         $request->validate([
             'name' => 'required|string|max:255', // Name is required, must be a string, and max 255 characters
             'email' => 'required|email|unique:users', // Email is required, must be valid and unique in the users table
-            'password' => 'required|min:6', // Password is required and must be at least 6 characters
-            'role_id' => 'required|exists:roles,id', // Role ID is required and must exist in the roles table
+            'password' => 'required|min:6|confirmed', // Password is required and must be at least 6 characters
         ]);
     
+        $role = Role::where('name', 'user')->first();
+
         // Create a new user with the validated data
         $user = User::create([
             'name' => $request->name,
             'email' => $request->email,
-            'role_id' => $request->role_id,
             'password' => Hash::make($request->password), // Hash the password before storing
+            'role_id' => $role->id,
         ]);
     
         // Generate a JWT token for the newly created user
