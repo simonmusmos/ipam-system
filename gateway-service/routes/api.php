@@ -24,4 +24,5 @@ Route::prefix('auth')->group(function () {
 
 Route::prefix('ip-addresses')->group(function () {
     Route::get('/', [ProxyIpController::class, 'index']);
+    Route::post('/', [ProxyIpController::class, 'create']);
 });

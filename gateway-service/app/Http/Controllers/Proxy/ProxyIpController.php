@@ -20,4 +20,10 @@ class ProxyIpController extends Controller
         $response = Http::acceptJson()->withToken($request->bearerToken())->get("{$this->serviceUrl}/ip-addresses", $request->all());
         return response($response->json(), $response->status());
     }
+
+    public function create(Request $request)
+    {
+        $response = Http::acceptJson()->withToken($request->bearerToken())->post("{$this->serviceUrl}/ip-addresses", $request->all());
+        return response($response->json(), $response->status());
+    }
 }
