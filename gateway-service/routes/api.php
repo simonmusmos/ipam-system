@@ -27,4 +27,5 @@ Route::prefix('ip-addresses')->group(function () {
     Route::get('/', [ProxyIpController::class, 'index']);
     Route::post('/', [ProxyIpController::class, 'create']);
     Route::put('/{id}', [ProxyIpController::class, 'update']);
+    Route::delete('/{id}', [ProxyIpController::class, 'destroy']);
 });

@@ -32,4 +32,10 @@ class ProxyIpController extends Controller
         $response = Http::acceptJson()->withToken($request->bearerToken())->put("{$this->serviceUrl}/ip-addresses/{$id}", $request->all());
         return response($response->json(), $response->status());
     }
+
+    public function destroy(Request $request, $id)
+    {
+        $response = Http::acceptJson()->withToken($request->bearerToken())->delete("{$this->serviceUrl}/ip-addresses/{$id}", $request->all());
+        return response($response->json(), $response->status());
+    }
 }

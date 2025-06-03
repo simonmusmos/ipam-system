@@ -245,29 +245,29 @@
         } else {
           const response = await api.post("http://localhost:8000/api/ip-addresses", formData.value);
         }
-        // if (response.ok) {
-          isCreateModalOpen.value = false;
-          await fetchIpAddresses();
-        // }
       } catch (error: any) {
         serverErrors.value = error.response?.data?.errors || {};
         console.log(serverErrors);
         console.error('Error saving IP address:', error);
       } finally {
         isLoading.value = false;
+        isCreateModalOpen.value = false;
+        await fetchIpAddresses();
       }
     };
     const handleDelete = async () => {
+      if (! selectedIp.value) {
+        return false;
+      }
       try {
-        const response = await fetch("http://localhost:8000/api/ip-addresses/${selectedIp.value.id}", {
-          method: 'DELETE',
-        });
-        if (response.ok) {
-          isDeleteModalOpen.value = false;
-          await fetchIpAddresses();
-        }
+        isLoading.value = true;
+        const response = await api.delete("http://localhost:8000/api/ip-addresses/" + selectedIp.value.id);
       } catch (error) {
         console.error('Error deleting IP address:', error);
+      } finally {
+        isDeleteModalOpen.value = false;
+        isLoading.value = false;
+        await fetchIpAddresses();
       }
     };
     onMounted(fetchIpAddresses);
