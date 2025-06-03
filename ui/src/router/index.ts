@@ -1,9 +1,8 @@
 import { createRouter, createWebHistory } from 'vue-router';
 import type { RouteRecordRaw } from 'vue-router';
-import LoginView from '../components/LoginForm.vue';
-import RegisterView from '../components/RegisterForm.vue';
 import IpManagementView from '../components/IpManagement.vue';
 import AuthView from '../components/AuthView.vue';
+import AuditLogs from '../components/AuditLogs.vue';
 
 const routes: RouteRecordRaw[] = [
   {
@@ -20,6 +19,12 @@ const routes: RouteRecordRaw[] = [
     path: '/ip-addresses',
     name: 'IpAddresses',
     component: IpManagementView,
+    meta: { requiresAuth: true },
+  },
+  {
+    path: '/logs',
+    name: 'AuditLogs',
+    component: AuditLogs,
     meta: { requiresAuth: true },
   },
 ];

@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Proxy\ProxyAuditController;
 use App\Http\Controllers\Proxy\ProxyAuthController;
 use App\Http\Controllers\Proxy\ProxyIpController;
 use Illuminate\Http\Request;
@@ -28,4 +29,8 @@ Route::prefix('ip-addresses')->group(function () {
     Route::post('/', [ProxyIpController::class, 'create']);
     Route::put('/{id}', [ProxyIpController::class, 'update']);
     Route::delete('/{id}', [ProxyIpController::class, 'destroy']);
+});
+
+Route::prefix('logs')->group(function () {
+    Route::get('/', [ProxyAuditController::class, 'index']);
 });

@@ -41,5 +41,6 @@ return [
     
     'audit' => [
         'base_uri' => env('AUDIT_SERVICE_URL'),
+        'internal_key' => env('AUDIT_INTERNAL_KEY'),
     ],
 ];
