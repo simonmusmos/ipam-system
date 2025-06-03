@@ -8,7 +8,7 @@ services:
     ports:
       - "8001:8000"
     volumes:
-      - ./auth-service:/var/www
+      - ./auth-service:/var/www:cached
     depends_on:
       - auth-db
     networks:
@@ -43,7 +43,7 @@ services:
     ports:
       - "8002:8000"
     volumes:
-      - ./ip-management-service:/var/www
+      - ./ip-management-service:/var/www:cached
     depends_on:
       - ip-db
     networks:
@@ -78,7 +78,7 @@ services:
     ports:
       - "8000:8000"
     volumes:
-      - ./gateway-service:/var/www
+      - ./gateway-service:/var/www:cached
     depends_on:
       - auth-service
       - ip-service
@@ -92,7 +92,7 @@ services:
     ports:
       - "8003:8000"
     volumes:
-      - ./audit-service:/var/www
+      - ./audit-service:/var/www:cached
     depends_on:
       - audit-db
     networks:

@@ -20,6 +20,7 @@ Route::prefix('auth')->group(function () {
     Route::post('/register', [ProxyAuthController::class, 'register']);
     Route::post('/login', [ProxyAuthController::class, 'login']);
     Route::get('/me', [ProxyAuthController::class, 'me']);
+    Route::post('/logout', [ProxyAuthController::class, 'logout']);
 });
 
 Route::prefix('ip-addresses')->group(function () {

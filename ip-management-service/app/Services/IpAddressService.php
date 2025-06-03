@@ -38,7 +38,7 @@ class IpAddressService
         $ips = $query->paginate($perPage);
         
         $ips->getCollection()->transform(function ($ip) use ($request) {
-            $ip->can_manage = $ip->user_id === $request->user_id || $request->role_id === 1;
+            $ip->can_manage = $ip->user_id == $request->user_id || $request->role === "superadmin";
             return $ip;
         });
 

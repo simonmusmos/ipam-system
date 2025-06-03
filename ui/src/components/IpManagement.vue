@@ -47,6 +47,43 @@
                         </tr>
                       </tbody>
                     </table>
+                    <div class="mt-6 flex items-center justify-between">
+                      <div class="text-sm text-gray-600">
+                        Page <strong>{{ pagination.current_page }}</strong> of <strong>{{ pagination.last_page }}</strong>
+                      </div>
+
+                      <nav class="inline-flex rounded-md shadow-sm isolate" aria-label="Pagination">
+                        <button
+                          @click="fetchIpAddresses(pagination.current_page - 1)"
+                          :disabled="pagination.current_page === 1"
+                          class="relative inline-flex items-center px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-l-md hover:bg-gray-50 disabled:opacity-50"
+                        >
+                          ‹ Prev
+                        </button>
+
+                        <template v-for="page in visiblePages" :key="page">
+                          <button
+                            @click="fetchIpAddresses(page)"
+                            :class="[
+                              'relative inline-flex items-center px-3 py-2 text-sm font-medium border',
+                              page === pagination.current_page
+                                ? 'z-10 bg-indigo-600 border-indigo-600 text-white'
+                                : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
+                            ]"
+                          >
+                            {{ page }}
+                          </button>
+                        </template>
+
+                        <button
+                          @click="fetchIpAddresses(pagination.current_page + 1)"
+                          :disabled="pagination.current_page === pagination.last_page"
+                          class="relative inline-flex items-center px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-r-md hover:bg-gray-50 disabled:opacity-50"
+                        >
+                          Next ›
+                        </button>
+                      </nav>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -132,7 +169,8 @@
   <script setup lang="ts">
     import {
       ref,
-      onMounted
+      onMounted,
+      computed
     } from 'vue';
     import {
       Dialog,
@@ -158,15 +196,22 @@
       label: '',
       comment: ''
     });
+    const pagination = ref({
+      current_page: 1,
+      last_page: 1,
+      per_page: 10,
+    });
     const serverErrors = ref<Record<string, string[]>>({});
     
-    const fetchIpAddresses = async () => {
+    const fetchIpAddresses = async (page = 1) => {
       try {
         isLoading.value = true;
-        const response = await api.get('http://localhost:8000/api/ip-addresses');
+        const response = await api.get(`http://localhost:8000/api/ip-addresses?page=${page}`);
         console.log(response);
         ipAddresses.value = response.data.data;
-        console.log(ipAddresses.value);
+        pagination.value.current_page = response.data.current_page;
+        pagination.value.last_page = response.data.last_page;
+        pagination.value.per_page = response.data.per_page;
       } catch (error) {
         console.error('Error fetching IP addresses:', error);
       } finally {
@@ -232,6 +277,27 @@
       dayjs.extend(timezone);
       return dayjs.utc(isoString).tz('Asia/Manila').format('MMMM DD, YYYY h:mm A');
     };
+
+    const visiblePages = computed(() => {
+      const pages = [];
+      const total = pagination.value.last_page;
+      const current = pagination.value.current_page;
+
+      let start = Math.max(current - 2, 1);
+      let end = Math.min(current + 2, total);
+
+      if (current <= 3) {
+        end = Math.min(5, total);
+      } else if (current >= total - 2) {
+        start = Math.max(total - 4, 1);
+      }
+
+      for (let i = start; i <= end; i++) {
+        pages.push(i);
+      }
+
+      return pages;
+    });
   </script>
   <style>
     .backdrop-blur-sm {

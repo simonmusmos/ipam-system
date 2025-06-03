@@ -29,6 +29,13 @@ class ProxyAuthController extends Controller
         return response($response->json(), $response->status());
     }
 
+    public function logout(Request $request)
+    {
+        $response = Http::acceptJson()->withToken($request->bearerToken())->post("{$this->baseUrl}/logout", $request->all());
+        
+        return response($response->json(), $response->status());
+    }
+
     public function me(Request $request)
     {
         return json_decode(Http::acceptJson()->withToken($request->bearerToken())->get("{$this->baseUrl}/me"));
