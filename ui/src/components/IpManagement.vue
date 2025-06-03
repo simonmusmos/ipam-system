@@ -28,24 +28,21 @@
                           <th scope="col" class="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900">IP Address</th>
                           <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Label</th>
                           <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Comment</th>
-                          <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Created By</th>
                           <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Created At</th>
-                          <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Action</th>
                           <th scope="col" class="relative py-3.5 pl-3 pr-4 sm:pr-6">
                             <span class="sr-only">Actions</span>
                           </th>
                         </tr>
                       </thead>
                       <tbody class="divide-y divide-gray-200 bg-white">
-                        <tr v-for="ip in ipAddresses.data" :key="ip.id" class="hover:bg-gray-50 transition-colors duration-150">
+                        <tr v-for="ip in ipAddresses" :key="ip.id" class="hover:bg-gray-50 transition-colors duration-150">
                           <td class="whitespace-nowrap py-4 pl-4 pr-3 text-sm text-gray-900">{{ ip.address }}</td>
                           <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-900">{{ ip.label }}</td>
                           <td class="px-3 py-4 text-sm text-gray-500">{{ ip.comment }}</td>
-                          <td class="px-3 py-4 text-sm text-gray-500">{{ ip.user_id }}</td>
                           <td class="px-3 py-4 text-sm text-gray-500">{{ formatDate(ip.created_at) }}</td>
                           <td class="relative whitespace-nowrap py-4 pl-3 pr-4 text-left text-sm font-medium">
-                            <button @click="openEditModal(ip)" class="text-indigo-600 hover:text-indigo-900 mr-4 transition-colors duration-200"> Edit </button>
-                            <button @click="openDeleteModal(ip)" class="text-red-600 hover:text-red-900 transition-colors duration-200"> Delete </button>
+                            <button v-if="ip.can_manage" @click="openEditModal(ip)" class="text-indigo-600 hover:text-indigo-900 mr-4 transition-colors duration-200"> Edit </button>
+                            <button v-if="ip.can_manage" @click="openDeleteModal(ip)" class="text-red-600 hover:text-red-900 transition-colors duration-200"> Delete </button>
                           </td>
                         </tr>
                       </tbody>
@@ -70,20 +67,28 @@
                         <form @submit.prevent="handleSubmit" class="space-y-4">
                           <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">IP Address</label>
-                            <input type="text" v-model="formData.ip_address" class="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 outline-none transition-all duration-200 ease-in-out px-4 py-2" placeholder="Enter IP address" />
+                            <input type="text" :disabled="selectedIp != null" v-model="formData.address" class="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 outline-none transition-all duration-200 ease-in-out px-4 py-2" placeholder="Enter IP address" />
+                            <div v-if="serverErrors.address" class="mt-2 mb-2 p-2 bg-red-50 border border-red-200 rounded-lg">
+                                <p class="text-red-600 text-sm pl-4">{{ serverErrors.address[0] }}</p>
+                            </div>
                           </div>
                           <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">Label</label>
                             <input type="text" v-model="formData.label" class="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 outline-none transition-all duration-200 ease-in-out px-4 py-2" placeholder="Enter label" />
+                            <div v-if="serverErrors.label" class="mt-2 mb-2 p-2 bg-red-50 border border-red-200 rounded-lg">
+                                <p class="text-red-600 text-sm pl-4">{{ serverErrors.label[0] }}</p>
+                            </div>
                           </div>
                           <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">Description</label>
-                            <textarea v-model="formData.description" rows="3" class="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 outline-none transition-all duration-200 ease-in-out px-4 py-2" placeholder="Enter description"></textarea>
+                            <textarea v-model="formData.comment" rows="3" class="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 outline-none transition-all duration-200 ease-in-out px-4 py-2" placeholder="Enter comment"></textarea>
                           </div>
                           <div class="mt-6 flex justify-end space-x-3">
-                            <button type="button" @click="isCreateModalOpen = false" class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-all duration-200"> Cancel </button>
-                            <button type="submit" class="px-4 py-2 text-sm font-medium text-white bg-indigo-600 border border-transparent rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-all duration-200">
-                              {{ selectedIp ? 'Update' : 'Create' }}
+                            <button type="button" :disabled="isLoading" @click="isCreateModalOpen = false" class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"> Cancel </button>
+                            <button type="submit" :disabled="isLoading" class="px-4 py-2 text-sm font-medium text-white bg-indigo-600 border border-transparent rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed">
+                              
+                              <span v-if="isLoading">{{ selectedIp ? 'Updating..' : 'Creating..' }}</span>
+                              <span v-else>{{ selectedIp ? 'Update' : 'Create' }}</span>
                             </button>
                           </div>
                         </form>
@@ -121,6 +126,8 @@
         </div>
       </div>
     </div>
+
+    <Loader />
   </template>
   <script setup lang="ts">
     import {
@@ -136,9 +143,10 @@
     import dayjs from 'dayjs';
     import utc from 'dayjs/plugin/utc';
     import timezone from 'dayjs/plugin/timezone';
-
+    import api from '../plugins/axios';
     import Sidebar from './Sidebar.vue';
     import Navbar from './Navbar.vue';
+    import Loader from './Loader.vue';
 
     const ipAddresses = ref([]);
     const isCreateModalOpen = ref(false);
@@ -146,21 +154,19 @@
     const isLoading = ref(false);
     const selectedIp = ref(null);
     const formData = ref({
-      ip_address: '',
+      address: '',
       label: '',
-      description: ''
+      comment: ''
     });
+    const serverErrors = ref<Record<string, string[]>>({});
+    
     const fetchIpAddresses = async () => {
       try {
         isLoading.value = true;
-        const response = await fetch('http://localhost:8000/api/ip-addresses', {
-            headers: {
-                'Authorization': `Bearer ${localStorage.getItem('token')}`,
-            },
-        });
+        const response = await api.get('http://localhost:8000/api/ip-addresses');
         console.log(response);
-        ipAddresses.value = await response.json();
-        console.log(ipAddresses);
+        ipAddresses.value = response.data.data;
+        console.log(ipAddresses.value);
       } catch (error) {
         console.error('Error fetching IP addresses:', error);
       } finally {
@@ -169,13 +175,13 @@
     };
     const openCreateModal = () => {
       formData.value = {
-        ip_address: '',
+        address: '',
         label: '',
-        description: ''
+        comment: ''
       };
       isCreateModalOpen.value = true;
     };
-    const openEditModal = (ip) => {
+    const openEditModal = (ip: any) => {
       selectedIp.value = ip;
       formData.value = {
         ...ip
@@ -188,21 +194,22 @@
     };
     const handleSubmit = async () => {
       try {
-        const url = selectedIp.value ? 'http://localhost:8000/api/ip-addresses/${selectedIp.value.id}' : 'http://localhost:8000/api/ip-addresses';
-        const method = selectedIp.value ? 'PUT' : 'POST';
-        const response = await fetch(url, {
-          method,
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(formData.value),
-        });
-        if (response.ok) {
+        isLoading.value = true;
+        if (selectedIp.value) {
+          const response = await api.put("http://localhost:8000/api/ip-addresses/" + selectedIp.value.id, formData.value);
+        } else {
+          const response = await api.post("http://localhost:8000/api/ip-addresses", formData.value);
+        }
+        // if (response.ok) {
           isCreateModalOpen.value = false;
           await fetchIpAddresses();
-        }
-      } catch (error) {
+        // }
+      } catch (error: any) {
+        serverErrors.value = error.response?.data?.errors || {};
+        console.log(serverErrors);
         console.error('Error saving IP address:', error);
+      } finally {
+        isLoading.value = false;
       }
     };
     const handleDelete = async () => {

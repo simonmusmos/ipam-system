@@ -35,7 +35,14 @@ class IpAddressService
 
         $perPage = $request->input('per_page', config('pagination.per_page'));
 
-        return $query->paginate($perPage);
+        $ips = $query->paginate($perPage);
+        
+        $ips->getCollection()->transform(function ($ip) use ($request) {
+            $ip->can_manage = $ip->user_id === $request->user_id || $request->role_id === 1;
+            return $ip;
+        });
+
+        return $ips;
     }
 
     public function getDetails(IpAddress $address)
