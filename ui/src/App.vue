@@ -1,7 +1,7 @@
-<script setup>
-import IpManagement from './components/IpManagement.vue';
-</script>
-
 <template>
-  <IpManagement />
+  <router-view />
 </template>
+
+<script setup lang="ts">
+// Nothing needed here
+</script>

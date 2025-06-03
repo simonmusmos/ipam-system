@@ -12,10 +12,12 @@
     "@headlessui/vue": "^1.7.23",
     "@tailwindcss/vite": "^4.1.8",
     "axios": "^1.9.0",
+    "dayjs": "^1.11.13",
     "headlessui": "^0.0.0",
     "tailwindcss": "^4.1.8",
     "vee-validate": "^4.15.0",
     "vue": "^3.5.13",
+    "vue-router": "^4.5.1",
     "yup": "^1.6.1"
   },
   "devDependencies": {

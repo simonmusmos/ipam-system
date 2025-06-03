@@ -3,6 +3,9 @@ import { ref, inject } from 'vue';
 import { useForm, useField } from 'vee-validate';
 import * as yup from 'yup';
 import axios from 'axios';
+import { useRouter } from 'vue-router';
+
+const router = useRouter();
 
 const registrationSuccess = inject('registrationSuccess');
 const apiError = ref('');
@@ -30,13 +33,21 @@ const onSubmit = handleSubmit(async (values) => {
         email: values.email,
         password: values.password,
     });
+    console.log(response.status);
+    if (response.status == 200) {
+      console.log('Login successful:', response.data);
+      // Automatically switch to login form after successful registration
+      localStorage.setItem('token', response.data.token);
 
-    console.log('Login successful:', response.data);
-    // Automatically switch to login form after successful registration
-    emit('switch-form');
+      router.push('/ip-addresses');
+    } else {
+      apiError.value = 'Invalid email or password. Please try again.1';
+    }
+    
   } catch (error: any) {
+    console.log(error);
     serverErrors.value = error.response?.data?.errors || {};
-    apiError.value = 'Invalid email or password. Please try again.';
+    apiError.value = 'Invalid email or password. Please try again.2';
   } finally {
     isLoading.value = false;
   }
