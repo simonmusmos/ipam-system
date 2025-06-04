@@ -20,59 +20,43 @@
                 <div class="inline-block min-w-full py-2 align-middle">
                   <div class="overflow-hidden shadow-sm ring-1 ring-black ring-opacity-5 rounded-lg">
                     <!-- Filters -->
-<div class="mb-6 bg-white p-4 rounded-lg shadow-sm">
-  <div class="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
-    <!-- Action Filter -->
-    <div>
-      <label class="block text-sm font-medium text-gray-700">Action</label>
-      <select v-model="filters.action" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
-        <option value="">All</option>
-        <option value="create">Create</option>
-        <option value="update">Update</option>
-        <option value="delete">Delete</option>
-        <option value="login">Login</option>
-        <option value="logout">Logout</option>
-      </select>
-    </div>
+                    <div class="mb-6 p-4 rounded-lg shadow-sm">
+                      <div class="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
+                        <!-- User Dropdown -->
+                        <div>
+                          <label class="block text-sm font-medium text-gray-700">User</label>
+                          <select
+                            v-model="filters.user_id"
+                            class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
+                          >
+                            <option value="">All Users</option>
+                            <option v-for="user in users" :key="user.id" :value="user.id">
+                              {{ user.name }}
+                            </option>
+                          </select>
+                        </div>
 
-    <!-- Model Filter -->
-    <div>
-      <label class="block text-sm font-medium text-gray-700">Model</label>
-      <select v-model="filters.model" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
-        <option value="">All</option>
-        <option value="IpAddress">IP Address</option>
-        <option value="User">User</option>
-        <!-- Add more as needed -->
-      </select>
-    </div>
+                        <!-- Date Range -->
+                        <div>
+                          <label class="block text-sm font-medium text-gray-700">From</label>
+                          <input type="date" v-model="filters.start_date" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500" />
+                        </div>
+                        <div>
+                          <label class="block text-sm font-medium text-gray-700">To</label>
+                          <input type="date" v-model="filters.end_date" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500" />
+                        </div>
 
-    <!-- Date Range -->
-    <div>
-      <label class="block text-sm font-medium text-gray-700">From</label>
-      <input type="date" v-model="filters.start_date" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500" />
-    </div>
-    <div>
-      <label class="block text-sm font-medium text-gray-700">To</label>
-      <input type="date" v-model="filters.end_date" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500" />
-    </div>
-
-    <!-- Search and Apply -->
-    <div class="md:col-span-4 flex justify-end space-x-2 mt-2">
-      <input
-        type="text"
-        v-model="filters.keyword"
-        placeholder="Search..."
-        class="w-full md:w-1/3 px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
-      />
-      <button @click="fetchAuditLogs()" class="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700">
-        Apply
-      </button>
-      <button @click="resetFilters" class="px-4 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300">
-        Reset
-      </button>
-    </div>
-  </div>
-</div>
+                        <!-- Search and Apply -->
+                        <div class="md:col-span-4 flex justify-end space-x-2 mt-2">
+                          <button @click="fetchAuditLogs()" class="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700">
+                            Apply
+                          </button>
+                          <button @click="resetFilters" class="px-4 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300">
+                            Reset
+                          </button>
+                        </div>
+                      </div>
+                    </div>
                     <table class="min-w-full divide-y divide-gray-300">
                       <thead class="bg-gray-50">
                         <tr>
@@ -168,7 +152,15 @@
     const fetchAuditLogs = async (page = 1) => {
       try {
         isLoading.value = true;
-        const response = await api.get(`http://localhost:8000/api/logs?page=${page}`);
+        const response = await api.get('http://localhost:8000/api/logs', {
+          params: {
+            page,
+            user_id: filters.value.user_id || undefined,
+            start_date: filters.value.start_date || undefined,
+            end_date: filters.value.end_date || undefined,
+          },
+        });
+
         auditLogs.value = response.data.data;
         pagination.value.current_page = response.data.current_page;
         pagination.value.last_page = response.data.last_page;
@@ -180,7 +172,10 @@
       }
     };
     
-    onMounted(fetchAuditLogs);
+    onMounted(() => {
+      fetchUsers();
+      fetchAuditLogs();
+    });
     
     const formatDate = (isoString: string): string => {
       dayjs.extend(utc);
@@ -213,24 +208,30 @@
       return changes.split(', ');
     };
 
+    const users = ref([]);
     const filters = ref({
-  action: '',
-  model: '',
-  start_date: '',
-  end_date: '',
-  keyword: '',
-});
+      user_id: '',
+      start_date: '',
+      end_date: '',
+    });
 
-const resetFilters = () => {
-  filters.value = {
-    action: '',
-    model: '',
-    start_date: '',
-    end_date: '',
-    keyword: '',
-  };
-  fetchAuditLogs();
-};
+    const resetFilters = () => {
+      filters.value = {
+        user_id: '',
+        start_date: '',
+        end_date: '',
+      };
+      fetchAuditLogs();
+    };
+
+    const fetchUsers = async () => {
+      try {
+        const response = await api.get('http://localhost:8000/api/auth/users'); // adjust this URL based on your gateway
+        users.value = response.data.data || response.data;
+      } catch (error) {
+        console.error('Error fetching users:', error);
+      }
+    };
   </script>
   <style>
     .backdrop-blur-sm {

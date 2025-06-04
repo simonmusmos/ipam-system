@@ -40,4 +40,11 @@ class ProxyAuthController extends Controller
     {
         return json_decode(Http::acceptJson()->withToken($request->bearerToken())->get("{$this->baseUrl}/me"));
     }
+
+    public function users(Request $request)
+    {
+        $response = Http::acceptJson()->withToken($request->bearerToken())->get("{$this->baseUrl}/users", $request->all());
+        
+        return response($response->json(), $response->status());
+    }
 }
