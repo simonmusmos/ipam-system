@@ -17,7 +17,7 @@ class AuditLogController extends Controller
     public function index(Request $request)
     {
         return $this->auditService->fetch(
-            $request->only(['user_id', 'action', 'model', 'start_date', 'end_date']),
+            $request->only(['user_id', 'action', 'model', 'model_id', 'start_date', 'end_date']),
             $request->input('per_page', config('pagination.per_page'))
         );
     }
@@ -34,6 +34,7 @@ class AuditLogController extends Controller
             'path' => 'nullable|string',
             'old_values' => 'nullable|array',
             'new_values' => 'nullable|array',
+            'model_description' => 'nullable|string',
         ]);
 
         return response()->json([

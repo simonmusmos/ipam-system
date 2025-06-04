@@ -21,8 +21,9 @@ class IpAddressService
         
         $this->logAudit($request, [
             'action' => 'delete',
-            'model' => class_basename($address),
+            'model' => class_basename($ip),
             'model_id' => $ip->id,
+            'model_description' => $ip->address
         ]);
         
         return $ip;
@@ -42,7 +43,8 @@ class IpAddressService
         $ips = $query->paginate($perPage);
         
         $ips->getCollection()->transform(function ($ip) use ($request) {
-            $ip->can_manage = $ip->user_id == $request->user_id || $request->role === "superadmin";
+            $ip->can_edit = $ip->user_id == $request->user_id || $request->role === "superadmin";
+            $ip->can_delete = $request->role === "superadmin";
             return $ip;
         });
 
@@ -76,6 +78,7 @@ class IpAddressService
             'model_id' => $address->id,
             'old_values' => $oldValues->toArray(),
             'new_values' => $newValues->toArray(),
+            'model_description' => $address->address
         ]);
 
         return $address;
@@ -94,6 +97,7 @@ class IpAddressService
             'model' => class_basename($address),
             'model_id' => $address->id,
             'old_values' => $oldValues->toArray(),
+            'model_description' => $address->address
         ]);
 
         $address->delete();

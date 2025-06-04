@@ -41,8 +41,9 @@
                           <td class="px-3 py-4 text-sm text-gray-500">{{ ip.comment }}</td>
                           <td class="px-3 py-4 text-sm text-gray-500">{{ formatDate(ip.created_at) }}</td>
                           <td class="relative whitespace-nowrap py-4 pl-3 pr-4 text-left text-sm font-medium">
-                            <button v-if="ip.can_manage" @click="openEditModal(ip)" class="text-indigo-600 hover:text-indigo-900 mr-4 transition-colors duration-200"> Edit </button>
-                            <button v-if="ip.can_manage" @click="openDeleteModal(ip)" class="text-red-600 hover:text-red-900 transition-colors duration-200"> Delete </button>
+                            <button v-if="ip.can_edit" @click="openEditModal(ip)" class="text-indigo-600 hover:text-indigo-900 mr-4 transition-colors duration-200"> Edit </button>
+                            <button v-if="ip.can_delete" @click="openDeleteModal(ip)" class="text-red-600 hover:text-red-900 mr-4 transition-colors duration-200"> Delete </button>
+                            <button @click="openLogsModal(ip)" class="text-green-600 hover:text-green-900 transition-colors duration-200"> View Logs </button>
                           </td>
                         </tr>
                       </tbody>
@@ -159,6 +160,86 @@
                 </div>
               </Dialog>
             </TransitionRoot>
+            <!-- Audit Logs Modal -->
+            <TransitionRoot appear :show="isLogsModalOpen" as="template">
+              <Dialog as="div" class="relative z-10" @close="isLogsModalOpen = false">
+                <TransitionChild as="template" enter="ease-out duration-300" enter-from="opacity-0" enter-to="opacity-100" leave="ease-in duration-200" leave-from="opacity-100" leave-to="opacity-0">
+                  <div class="fixed inset-0 bg-black/25 backdrop-blur-sm transition-opacity" />
+                </TransitionChild>
+                <div class="fixed inset-0 overflow-y-auto">
+                  <div class="flex min-h-full items-center justify-center p-4 text-center">
+                    <TransitionChild as="template" enter="ease-out duration-300" enter-from="opacity-0 scale-95 translate-y-4" enter-to="opacity-100 scale-100 translate-y-0" leave="ease-in duration-200" leave-from="opacity-100 scale-100 translate-y-0" leave-to="opacity-0 scale-95 translate-y-4">
+                      <DialogPanel class="w-full max-w-xl transform overflow-hidden rounded-2xl bg-white p-6 text-left align-middle shadow-xl transition-all">
+                        <h3 class="text-lg font-medium leading-6 text-gray-900 mb-4"> Audit Logs </h3>
+                        <table class="min-w-full divide-y divide-gray-300">
+                          <thead class="bg-gray-50">
+                            <tr>
+                              <th scope="col" class="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900">Action</th>
+                              <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Date</th>
+                            </tr>
+                          </thead>
+                          <tbody class="divide-y divide-gray-200 bg-white">
+                            <tr v-for="log in auditLogs" :key="log.id" class="hover:bg-gray-50 transition-colors duration-150">
+                              <td class="whitespace-nowrap py-4 pl-4 pr-3 text-sm text-gray-900">
+                                <!-- Main Description -->
+                                <div class="font-medium text-gray-900">{{ log.description }}</div>
+
+                                <!-- Changes displayed underneath -->
+                                <ul v-if="log.changes" class="mt-1 ml-4 list-none text-xs text-gray-400">
+                                  <li v-for="change in parseChanges(log.changes)" :key="change">{{ change }}</li>
+                                </ul>
+                              </td>
+                              <td class="px-3 py-4 text-sm text-gray-500">{{ formatDate(log.created_at) }}</td>
+                            </tr>
+                          </tbody>
+                        </table>
+                        <div class="mt-6 flex items-center justify-between">
+                          <div class="text-sm text-gray-600">
+                            Page <strong>{{ logs_pagination.current_page }}</strong> of <strong>{{ logs_pagination.last_page }}</strong>
+                          </div>
+
+                          <nav class="inline-flex rounded-md shadow-sm isolate" aria-label="Pagination">
+                            <button
+                              @click="openLogsModal(selectedIp, logs_pagination.current_page - 1)"
+                              :disabled="logs_pagination.current_page === 1"
+                              class="relative inline-flex items-center px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-l-md hover:bg-gray-50 disabled:opacity-50"
+                            >
+                              ‹ Prev
+                            </button>
+
+                            <template v-for="page in visiblePages" :key="page">
+                              <button
+                                @click="openLogsModal(selectedIp, page)"
+                                :class="[
+                                  'relative inline-flex items-center px-3 py-2 text-sm font-medium border',
+                                  page === logs_pagination.current_page
+                                    ? 'z-10 bg-indigo-600 border-indigo-600 text-white'
+                                    : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
+                                ]"
+                              >
+                                {{ page }}
+                              </button>
+                            </template>
+
+                            <button
+                              @click="openLogsModal(selectedIp, logs_pagination.current_page + 1)"
+                              :disabled="logs_pagination.current_page === logs_pagination.last_page"
+                              class="relative inline-flex items-center px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-r-md hover:bg-gray-50 disabled:opacity-50"
+                            >
+                              Next ›
+                            </button>
+                          </nav>
+                        </div>
+                        <div class="mt-6 flex justify-end space-x-3">
+                          <button type="button" @click="isLogsModalOpen = false" class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-all duration-200"> Cancel </button>
+                          
+                        </div>
+                      </DialogPanel>
+                    </TransitionChild>
+                  </div>
+                </div>
+              </Dialog>
+            </TransitionRoot>
           </div>
         </div>
       </div>
@@ -187,8 +268,10 @@
     import Loader from './Loader.vue';
 
     const ipAddresses = ref([]);
+    const auditLogs = ref([]);
     const isCreateModalOpen = ref(false);
     const isDeleteModalOpen = ref(false);
+    const isLogsModalOpen = ref(false);
     const isLoading = ref(false);
     const selectedIp = ref(null);
     const formData = ref({
@@ -200,6 +283,11 @@
       current_page: 1,
       last_page: 1,
       per_page: 10,
+    });
+    const logs_pagination = ref({
+      current_page: 1,
+      last_page: 1,
+      per_page: 5,
     });
     const serverErrors = ref<Record<string, string[]>>({});
     
@@ -233,9 +321,26 @@
       };
       isCreateModalOpen.value = true;
     };
-    const openDeleteModal = (ip) => {
+    const openDeleteModal = (ip: any) => {
       selectedIp.value = ip;
       isDeleteModalOpen.value = true;
+    };
+
+    const openLogsModal = async (ip: any, page = 1) => {
+      try {
+        isLoading.value = true;
+        selectedIp.value = ip;
+        const response = await api.get(`http://localhost:8000/api/logs?page=${page}&per_page=${logs_pagination.value.per_page}&model_id=${ip.id}&model=IpAddress`);
+        auditLogs.value = response.data.data;
+        logs_pagination.value.current_page = response.data.current_page;
+        logs_pagination.value.last_page = response.data.last_page;
+        logs_pagination.value.per_page = response.data.per_page;
+      } catch (error) {
+        console.error('Error fetching IP addresses:', error);
+      } finally {
+        isLoading.value = false;
+        isLogsModalOpen.value = true;
+      }
     };
     const handleSubmit = async () => {
       try {
@@ -298,6 +403,10 @@
 
       return pages;
     });
+
+    const parseChanges = (changes: string) => {
+      return changes.split(', ');
+    };
   </script>
   <style>
     .backdrop-blur-sm {
