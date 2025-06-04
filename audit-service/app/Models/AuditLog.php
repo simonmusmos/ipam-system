@@ -17,8 +17,15 @@ class AuditLog extends Model
         'ip_address',
         'user_agent',
         'path',
+        'old_values',
+        'new_values',
     ];
 
+    protected $casts = [
+        'old_values' => 'array',
+        'new_values' => 'array',
+    ];
+    
     public function scopeFilter($query, array $filters)
     {
         return $query

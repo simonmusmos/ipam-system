@@ -19,7 +19,11 @@ class IpAddressService
             'comment' => $request->comment ?? null,
         ]);
         
-        $this->logAudit($request, 'create', 'ip_address', $ip->id);
+        $this->logAudit($request, [
+            'action' => 'delete',
+            'model' => class_basename($address),
+            'model_id' => $ip->id,
+        ]);
         
         return $ip;
     }
@@ -56,12 +60,23 @@ class IpAddressService
             throw new \Exception('Unauthorized');
         }
 
-        $address->update([
-            'label' => $request->label,
-            'comment' => $request->comment ?? null,
-        ]);
+        $original = $address->getOriginal();
 
-        $this->logAudit($request, 'update', 'ip_address', $address->id);
+        $address->fill($request->all());
+
+        $changedFields = $address->getDirty();
+        $oldValues = collect($original)->only(array_keys($changedFields))->except(['updated_at', 'created_at']);
+        $newValues = collect($changedFields)->except(['updated_at', 'created_at']);
+
+        $address->save();
+
+        $this->logAudit($request, [
+            'action' => 'update',
+            'model' => class_basename($address),
+            'model_id' => $address->id,
+            'old_values' => $oldValues->toArray(),
+            'new_values' => $newValues->toArray(),
+        ]);
 
         return $address;
     }
@@ -72,7 +87,14 @@ class IpAddressService
             throw new \Exception('Unauthorized');
         }
 
-        $this->logAudit($request, 'delete', 'ip_address', $address->id);
+        $original = $address->getOriginal();
+
+        $this->logAudit($request, [
+            'action' => 'delete',
+            'model' => class_basename($address),
+            'model_id' => $address->id,
+            'old_values' => $oldValues->toArray(),
+        ]);
 
         $address->delete();
     }

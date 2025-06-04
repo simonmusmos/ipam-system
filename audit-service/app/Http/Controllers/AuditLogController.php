@@ -32,6 +32,8 @@ class AuditLogController extends Controller
             'ip_address' => 'nullable|ip',
             'user_agent' => 'nullable|string',
             'path' => 'nullable|string',
+            'old_values' => 'nullable|array',
+            'new_values' => 'nullable|array',
         ]);
 
         return response()->json([
