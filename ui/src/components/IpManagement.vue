@@ -28,6 +28,7 @@
                           <th scope="col" class="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900">IP Address</th>
                           <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Label</th>
                           <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Comment</th>
+                          <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Created By</th>
                           <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Created At</th>
                           <th scope="col" class="relative py-3.5 pl-3 pr-4 sm:pr-6">
                             <span class="sr-only">Actions</span>
@@ -39,6 +40,7 @@
                           <td class="whitespace-nowrap py-4 pl-4 pr-3 text-sm text-gray-900">{{ ip.address }}</td>
                           <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-900">{{ ip.label }}</td>
                           <td class="px-3 py-4 text-sm text-gray-500">{{ ip.comment }}</td>
+                          <td class="px-3 py-4 text-sm text-gray-500">{{ usersCache[ip.user_id]?.name || '' }}</td>
                           <td class="px-3 py-4 text-sm text-gray-500">{{ formatDate(ip.created_at) }}</td>
                           <td class="relative whitespace-nowrap py-4 pl-3 pr-4 text-left text-sm font-medium">
                             <button v-if="ip.can_edit" @click="openEditModal(ip)" class="text-indigo-600 hover:text-indigo-900 mr-4 transition-colors duration-200"> Edit </button>
@@ -90,7 +92,13 @@
               </div>
             </div>
             <!-- Create/Edit Modal -->
-            <TransitionRoot appear :show="isCreateModalOpen" as="template">
+            
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <TransitionRoot appear :show="isCreateModalOpen" as="template">
               <Dialog as="div" class="relative z-10" @close="isCreateModalOpen = false">
                 <TransitionChild as="template" enter="ease-out duration-300" enter-from="opacity-0" enter-to="opacity-100" leave="ease-in duration-200" leave-from="opacity-100" leave-to="opacity-0">
                   <div class="fixed inset-0 bg-black/25 backdrop-blur-sm transition-opacity" />
@@ -106,6 +114,9 @@
                           <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">IP Address</label>
                             <input type="text" :disabled="selectedIp != null" v-model="formData.address" class="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 outline-none transition-all duration-200 ease-in-out px-4 py-2" placeholder="Enter IP address" />
+                            <p class="mt-1 text-xs text-gray-500">
+                              Detected Type: <span class="font-medium">{{ detectedType }}</span>
+                            </p>
                             <div v-if="serverErrors.address" class="mt-2 mb-2 p-2 bg-red-50 border border-red-200 rounded-lg">
                                 <p class="text-red-600 text-sm pl-4">{{ serverErrors.address[0] }}</p>
                             </div>
@@ -169,12 +180,13 @@
                 <div class="fixed inset-0 overflow-y-auto">
                   <div class="flex min-h-full items-center justify-center p-4 text-center">
                     <TransitionChild as="template" enter="ease-out duration-300" enter-from="opacity-0 scale-95 translate-y-4" enter-to="opacity-100 scale-100 translate-y-0" leave="ease-in duration-200" leave-from="opacity-100 scale-100 translate-y-0" leave-to="opacity-0 scale-95 translate-y-4">
-                      <DialogPanel class="w-full max-w-xl transform overflow-hidden rounded-2xl bg-white p-6 text-left align-middle shadow-xl transition-all">
+                      <DialogPanel class="w-full max-w-xl transform overflow-hidden rounded-2xl bg-white p-6 text-left align-middle shadow-xl transition-all" style="max-width: 70rem">
                         <h3 class="text-lg font-medium leading-6 text-gray-900 mb-4"> Audit Logs </h3>
                         <table class="min-w-full divide-y divide-gray-300">
                           <thead class="bg-gray-50">
                             <tr>
                               <th scope="col" class="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900">Action</th>
+                              <th scope="col" class="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900">User</th>
                               <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Date</th>
                             </tr>
                           </thead>
@@ -189,6 +201,7 @@
                                   <li v-for="change in parseChanges(log.changes)" :key="change">{{ change }}</li>
                                 </ul>
                               </td>
+                              <td class="px-3 py-4 text-sm text-gray-500">{{ usersCache[log.user_id]?.name || '' }}</td>
                               <td class="px-3 py-4 text-sm text-gray-500">{{ formatDate(log.created_at) }}</td>
                             </tr>
                           </tbody>
@@ -207,7 +220,7 @@
                               ‹ Prev
                             </button>
 
-                            <template v-for="page in visiblePages" :key="page">
+                            <template v-for="page in visibleLogPages" :key="page">
                               <button
                                 @click="openLogsModal(selectedIp, page)"
                                 :class="[
@@ -240,11 +253,6 @@
                 </div>
               </Dialog>
             </TransitionRoot>
-          </div>
-        </div>
-      </div>
-    </div>
-
     <Loader />
   </template>
   <script setup lang="ts">
@@ -289,6 +297,20 @@
       last_page: 1,
       per_page: 5,
     });
+
+    const usersCache = ref<Record<number, { id: number; name: string }>>({});
+
+    const fetchUsers = async () => {
+      try {
+        const response = await api.get('http://localhost:8000/api/auth/users');
+        for (const user of response.data) {
+          usersCache.value[user.id] = user;
+        }
+      } catch (error) {
+        console.error('Failed to fetch users:', error);
+      }
+    };
+
     const serverErrors = ref<Record<string, string[]>>({});
     
     const fetchIpAddresses = async (page = 1) => {
@@ -350,13 +372,13 @@
         } else {
           const response = await api.post("http://localhost:8000/api/ip-addresses", formData.value);
         }
+        isCreateModalOpen.value = false;
       } catch (error: any) {
         serverErrors.value = error.response?.data?.errors || {};
         console.log(serverErrors);
         console.error('Error saving IP address:', error);
       } finally {
         isLoading.value = false;
-        isCreateModalOpen.value = false;
         await fetchIpAddresses();
       }
     };
@@ -375,7 +397,11 @@
         await fetchIpAddresses();
       }
     };
-    onMounted(fetchIpAddresses);
+
+    onMounted(async () => {
+      await fetchUsers();        // Ensures users are loaded first
+      await fetchIpAddresses();  // Then loads IPs after users
+    });
     
     const formatDate = (isoString: string): string => {
       dayjs.extend(utc);
@@ -404,9 +430,44 @@
       return pages;
     });
 
+    const visibleLogPages = computed(() => {
+      const pages = [];
+      const total = logs_pagination.value.last_page;
+      const current = logs_pagination.value.current_page;
+
+      let start = Math.max(current - 2, 1);
+      let end = Math.min(current + 2, total);
+
+      if (current <= 3) {
+        end = Math.min(5, total);
+      } else if (current >= total - 2) {
+        start = Math.max(total - 4, 1);
+      }
+
+      for (let i = start; i <= end; i++) {
+        pages.push(i);
+      }
+
+      return pages;
+    });
+
     const parseChanges = (changes: string) => {
       return changes.split(', ');
     };
+
+    // Live-detect IP type in frontend for display
+    const detectedType = computed(() => {
+      const ip = formData.value.address.trim();
+
+      if (!ip) return '';
+
+      const ipv4Regex = /^(25[0-5]|2[0-4]\d|1\d{2}|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d{2}|[1-9]?\d)){3}$/;
+      const ipv6Regex = /^(([0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4}|::1|::)$/;
+
+      if (ipv4Regex.test(ip)) return 'IPv4';
+      if (ipv6Regex.test(ip)) return 'IPv6';
+      return 'Invalid IP';
+    });
   </script>
   <style>
     .backdrop-blur-sm {

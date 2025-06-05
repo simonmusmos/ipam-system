@@ -18,6 +18,7 @@ class IpAddress extends Model
         'address',
         'label',
         'comment',
+        'type',
     ];
 
     public function scopeFilter($query, $filters)
@@ -34,5 +35,18 @@ class IpAddress extends Model
         }
 
         return $query;
+    }
+
+    protected static function booted()
+    {
+        static::saving(function ($ipAddress) {
+            $ip = $ipAddress->address;
+
+            if (filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_IPV6)) {
+                $ipAddress->type = 'ipv6';
+            } elseif (filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4)) {
+                $ipAddress->type = 'ipv4';
+            }
+        });
     }
 }
