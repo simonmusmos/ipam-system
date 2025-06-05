@@ -3,6 +3,7 @@ import type { RouteRecordRaw } from 'vue-router';
 import IpManagementView from '../components/IpManagement.vue';
 import AuthView from '../components/AuthView.vue';
 import AuditLogs from '../components/AuditLogs.vue';
+import Dashboard from '../components/Dashboard.vue';
 
 const routes: RouteRecordRaw[] = [
   {
@@ -25,6 +26,12 @@ const routes: RouteRecordRaw[] = [
     path: '/logs',
     name: 'AuditLogs',
     component: AuditLogs,
+    meta: { requiresAuth: true },
+  },
+  {
+    path: '/dashboard',
+    name: 'Dashboard',
+    component: Dashboard,
     meta: { requiresAuth: true },
   },
 ];

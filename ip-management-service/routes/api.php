@@ -2,6 +2,7 @@
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\IpAddressController;
 
 /*
@@ -21,4 +22,6 @@ Route::middleware('jwt')->group(function () {
     Route::get('/ip-addresses/{ip}', [IpAddressController::class, 'getDetails']);
     Route::put('/ip-addresses/{ip}', [IpAddressController::class, 'update']);
     Route::delete('/ip-addresses/{ip}', [IpAddressController::class, 'destroy']);
+
+    Route::get('/dashboard', [DashboardController::class, 'index']);
 });

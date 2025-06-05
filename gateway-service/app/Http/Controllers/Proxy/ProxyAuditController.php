@@ -20,4 +20,10 @@ class ProxyAuditController extends Controller
         $response = Http::acceptJson()->withHeaders(['X-Internal-Key' => config('services.audit.internal_key')])->withToken($request->bearerToken())->get("{$this->auditUrl}/audit", $request->all());
         return response($response->json(), $response->status());
     }
+
+    public function dashboard(Request $request)
+    {
+        $response = Http::acceptJson()->withHeaders(['X-Internal-Key' => config('services.audit.internal_key')])->withToken($request->bearerToken())->get("{$this->auditUrl}/dashboard", $request->all());
+        return response($response->json(), $response->status());
+    }
 }

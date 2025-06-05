@@ -30,7 +30,7 @@
                             class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
                           >
                             <option value="">All Users</option>
-                            <option v-for="user in users" :key="user.id" :value="user.id">
+                            <option v-for="user in usersCache" :key="user.id" :value="user.id">
                               {{ user.name }}
                             </option>
                           </select>
@@ -61,6 +61,7 @@
                       <thead class="bg-gray-50">
                         <tr>
                           <th scope="col" class="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900">Action</th>
+                          <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">User</th>
                           <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Date</th>
                         </tr>
                       </thead>
@@ -75,6 +76,7 @@
                               <li v-for="change in parseChanges(log.changes)" :key="change">{{ change }}</li>
                             </ul>
                           </td>
+                          <td class="px-3 py-4 text-sm text-gray-500">{{ usersCache[log.user_id]?.name || '' }}</td>
                           <td class="px-3 py-4 text-sm text-gray-500">{{ formatDate(log.created_at) }}</td>
                         </tr>
                       </tbody>
@@ -172,9 +174,9 @@
       }
     };
     
-    onMounted(() => {
-      fetchUsers();
-      fetchAuditLogs();
+    onMounted(async () => {
+      await fetchUsers();        // Ensures users are loaded first
+      await fetchAuditLogs();  // Then loads IPs after users
     });
     
     const formatDate = (isoString: string): string => {
@@ -208,7 +210,6 @@
       return changes.split(', ');
     };
 
-    const users = ref([]);
     const filters = ref({
       user_id: '',
       start_date: '',
@@ -224,12 +225,16 @@
       fetchAuditLogs();
     };
 
+    const usersCache = ref<Record<number, { id: number; name: string }>>({});
+
     const fetchUsers = async () => {
       try {
-        const response = await api.get('http://localhost:8000/api/auth/users'); // adjust this URL based on your gateway
-        users.value = response.data.data || response.data;
+        const response = await api.get('http://localhost:8000/api/auth/users');
+        for (const user of response.data) {
+          usersCache.value[user.id] = user;
+        }
       } catch (error) {
-        console.error('Error fetching users:', error);
+        console.error('Failed to fetch users:', error);
       }
     };
   </script>

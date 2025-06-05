@@ -3,6 +3,7 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\UserController;
 
 /*
@@ -25,4 +26,5 @@ Route::middleware('auth:api')->group(function () {
     Route::get('/validate-token', [AuthController::class, 'validateToken']);
 
     Route::get('/users', [UserController::class, 'index']);
+    Route::get('/dashboard', [DashboardController::class, 'index']);
 });

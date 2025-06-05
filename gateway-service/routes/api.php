@@ -23,6 +23,7 @@ Route::prefix('auth')->group(function () {
     Route::get('/me', [ProxyAuthController::class, 'me']);
     Route::post('/logout', [ProxyAuthController::class, 'logout']);
     Route::get('/users', [ProxyAuthController::class, 'users']);
+    Route::get('/dashboard', [ProxyAuthController::class, 'dashboard']);
 });
 
 Route::prefix('ip-addresses')->group(function () {
@@ -30,8 +31,10 @@ Route::prefix('ip-addresses')->group(function () {
     Route::post('/', [ProxyIpController::class, 'create']);
     Route::put('/{id}', [ProxyIpController::class, 'update']);
     Route::delete('/{id}', [ProxyIpController::class, 'destroy']);
+    Route::get('/dashboard', [ProxyIpController::class, 'dashboard']);
 });
 
 Route::prefix('logs')->group(function () {
     Route::get('/', [ProxyAuditController::class, 'index']);
+    Route::get('/dashboard', [ProxyAuditController::class, 'dashboard']);
 });
