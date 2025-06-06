@@ -10,7 +10,7 @@ class IpAddress extends Model
 {
     use HasFactory, SoftDeletes;
 
-    public const ALLOWED_FILTERS = ['address', 'label'];
+    public const ALLOWED_FILTERS = ['address', 'label', 'user'];
     public const ALLOWED_SORTS = ['created_at', 'label'];
 
     protected $fillable = [
@@ -24,6 +24,7 @@ class IpAddress extends Model
     public function scopeFilter($query, $filters)
     {
         return $query
+            ->when(isset($filters['user']), fn($q) => $q->where('user_id', '=', $filters['user']))
             ->when(isset($filters['address']), fn($q) => $q->where('address', 'like', '%' . $filters['address'] . '%'))
             ->when(isset($filters['label']), fn($q) => $q->where('label', 'like', '%' . $filters['label'] . '%'));
     }

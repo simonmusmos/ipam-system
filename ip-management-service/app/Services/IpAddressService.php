@@ -64,7 +64,7 @@ class IpAddressService
 
         $original = $address->getOriginal();
 
-        $address->fill($request->all());
+        $address->fill($request->only(['label', 'comment']));
 
         $changedFields = $address->getDirty();
         $oldValues = collect($original)->only(array_keys($changedFields))->except(['updated_at', 'created_at']);

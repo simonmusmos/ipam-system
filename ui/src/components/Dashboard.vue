@@ -41,7 +41,7 @@ var ipTrendData = {
   labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
   datasets: [{
     label: 'IP Addresses',
-    data: [12, 19, 15, 25, 22, 30],
+    data: [0, 0, 0, 0, 0, 0],
     borderColor: '#4F46E5',
     tension: 0.4,
     fill: false
@@ -60,7 +60,7 @@ var activityData = {
   labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
   datasets: [{
     label: 'Activities',
-    data: [65, 59, 80, 81, 56, 55, 40],
+    data: [0, 0, 0, 0, 0, 0, 0],
     backgroundColor: '#4F46E5'
   }]
 };

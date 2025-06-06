@@ -22,6 +22,44 @@
               <div class="-mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
                 <div class="inline-block min-w-full py-2 align-middle">
                   <div class="overflow-hidden shadow-sm ring-1 ring-black ring-opacity-5 rounded-lg">
+                    <!-- Filters -->
+                    <div class="mb-6 p-4 rounded-lg shadow-sm">
+                      <div class="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
+                        <!-- User Dropdown -->
+                        <div>
+                          <label class="block text-sm font-medium text-gray-700">User</label>
+                          <select
+                            v-model="filters.user_id"
+                            class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
+                          >
+                            <option value="">All Users</option>
+                            <option v-for="user in usersCache" :key="user.id" :value="user.id">
+                              {{ user.name }}
+                            </option>
+                          </select>
+                        </div>
+
+                        <!-- Address -->
+                        <div>
+                          <label class="block text-sm font-medium text-gray-700">IP Address</label>
+                          <input type="text" v-model="filters.address" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500" />
+                        </div>
+                        <div>
+                          <label class="block text-sm font-medium text-gray-700">Label</label>
+                          <input type="text" v-model="filters.label" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500" />
+                        </div>
+
+                        <!-- Search and Apply -->
+                        <div class="md:col-span-4 flex justify-end space-x-2 mt-2">
+                          <button @click="fetchIpAddresses()" class="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700">
+                            Apply
+                          </button>
+                          <button @click="resetFilters" class="px-4 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300">
+                            Reset
+                          </button>
+                        </div>
+                      </div>
+                    </div>
                     <table class="min-w-full divide-y divide-gray-300">
                       <thead class="bg-gray-50">
                         <tr>
@@ -316,7 +354,14 @@
     const fetchIpAddresses = async (page = 1) => {
       try {
         isLoading.value = true;
-        const response = await api.get(`http://localhost:8000/api/ip-addresses?page=${page}`);
+        const response = await api.get(`http://localhost:8000/api/ip-addresses`, {
+          params: {
+            page,
+            user: filters.value.user_id || undefined,
+            address: filters.value.address || undefined,
+            label: filters.value.label || undefined,
+          },
+        });
         console.log(response);
         ipAddresses.value = response.data.data;
         pagination.value.current_page = response.data.current_page;
@@ -468,6 +513,22 @@
       if (ipv6Regex.test(ip)) return 'IPv6';
       return 'Invalid IP';
     });
+
+    const filters = ref({
+      user_id: '',
+      address: '',
+      label: '',
+    });
+
+    const resetFilters = () => {
+      filters.value = {
+        user_id: '',
+        address: '',
+        label: '',
+      };
+      fetchIpAddresses();
+    };
+
   </script>
   <style>
     .backdrop-blur-sm {
