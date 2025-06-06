@@ -16,9 +16,19 @@ class AuditLogController extends Controller
 
     public function index(Request $request)
     {
-        return $this->auditService->fetch(
-            $request->only(['user_id', 'action', 'model', 'model_id', 'start_date', 'end_date']),
-            $request->input('per_page', config('pagination.per_page'))
+        if ($request->role != 'superadmin') {
+            $request->merge(['user' => $request->user_id]);
+        }
+        
+        return response()->json(
+            [
+                'isAdmin' => ($request->role === 'superadmin'),
+                'data' => $this->auditService->fetch(
+                    $request->only(['user', 'action', 'model', 'model_id', 'start_date', 'end_date']),
+                    $request->input('per_page', config('pagination.per_page'))
+                ),
+                'request' => $request->all()
+            ]
         );
     }
 

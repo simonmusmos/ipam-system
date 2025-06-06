@@ -30,7 +30,7 @@ class AuditLog extends Model
     public function scopeFilter($query, array $filters)
     {
         return $query
-            ->when($filters['user_id'] ?? null, fn($q, $v) => $q->where('user_id', $v))
+            ->when($filters['user'] ?? null, fn($q, $v) => $q->where('user_id', $v))
             ->when($filters['action'] ?? null, fn($q, $v) => $q->where('action', $v))
             ->when($filters['model'] ?? null, fn($q, $v) => $q->where('model', $v))
             ->when($filters['model_id'] ?? null, fn($q, $v) => $q->where('model_id', $v))

@@ -16,8 +16,8 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::middleware('internal')->group(function () {
+Route::middleware(['internal', 'jwt'])->group(function () {
     Route::get('/audit', [AuditLogController::class, 'index']);
-    Route::post('/audit', [AuditLogController::class, 'store']);
     Route::get('/dashboard', [DashboardController::class, 'index']);
 });
+Route::post('/audit', [AuditLogController::class, 'store']);

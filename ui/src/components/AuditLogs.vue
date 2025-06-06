@@ -23,7 +23,7 @@
                     <div class="mb-6 p-4 rounded-lg shadow-sm">
                       <div class="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
                         <!-- User Dropdown -->
-                        <div>
+                        <div v-if="isAdmin">
                           <label class="block text-sm font-medium text-gray-700">User</label>
                           <select
                             v-model="filters.user_id"
@@ -145,6 +145,7 @@
 
     const auditLogs = ref([]);
     const isLoading = ref(false);
+    const isAdmin = ref(false);
     const pagination = ref({
       current_page: 1,
       last_page: 1,
@@ -157,16 +158,17 @@
         const response = await api.get('http://localhost:8000/api/logs', {
           params: {
             page,
-            user_id: filters.value.user_id || undefined,
+            user: filters.value.user_id || undefined,
             start_date: filters.value.start_date || undefined,
             end_date: filters.value.end_date || undefined,
           },
         });
 
-        auditLogs.value = response.data.data;
-        pagination.value.current_page = response.data.current_page;
-        pagination.value.last_page = response.data.last_page;
-        pagination.value.per_page = response.data.per_page;
+        auditLogs.value = response.data.data.data;
+        pagination.value.current_page = response.data.data.current_page;
+        pagination.value.last_page = response.data.data.last_page;
+        pagination.value.per_page = response.data.data.per_page;
+        isAdmin.value = response.data.isAdmin;
       } catch (error) {
         console.error('Error fetching Audit Logs:', error);
       } finally {

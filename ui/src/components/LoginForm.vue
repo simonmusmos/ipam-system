@@ -41,13 +41,13 @@ const onSubmit = handleSubmit(async (values) => {
 
       router.push('/ip-addresses');
     } else {
-      apiError.value = 'Invalid email or password. Please try again.1';
+      apiError.value = 'Invalid email or password. Please try again.';
     }
     
   } catch (error: any) {
     console.log(error);
     serverErrors.value = error.response?.data?.errors || {};
-    apiError.value = 'Invalid email or password. Please try again.2';
+    apiError.value = 'Invalid email or password. Please try again.';
   } finally {
     isLoading.value = false;
   }
