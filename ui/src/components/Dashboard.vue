@@ -1,150 +1,5 @@
-<script setup>
-import { ref, onMounted } from 'vue';
-import { Line, Pie, Bar } from 'vue-chartjs';
-import {
-  Chart as ChartJS,
-  Title,
-  Tooltip,
-  Legend,
-  LineElement,
-  LinearScale,
-  PointElement,
-  CategoryScale,
-  ArcElement,
-  BarElement
-} from 'chart.js';
-import api from '../plugins/axios';
-import Sidebar from './Sidebar.vue';
-import Navbar from './Navbar.vue';
-import Loader from './Loader.vue';
-
-ChartJS.register(
-  Title,
-  Tooltip,
-  Legend,
-  LineElement,
-  LinearScale,
-  PointElement,
-  CategoryScale,
-  ArcElement,
-  BarElement
-);
-
-const isLoading = ref(false);
-const stats = ref({
-    'total_ip_addresses' : 0,
-    'total_users': 0,
-    'recent_activities': 0
-});
-
-var ipTrendData = {
-  labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
-  datasets: [{
-    label: 'IP Addresses',
-    data: [0, 0, 0, 0, 0, 0],
-    borderColor: '#4F46E5',
-    tension: 0.4,
-    fill: false
-  }]
-};
-
-var ipTypeData = {
-  labels: ['IPv4', 'IPv6'],
-  datasets: [{
-    data: [0, 0],
-    backgroundColor: ['#4F46E5', '#10B981']
-  }]
-};
-
-var activityData = {
-  labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
-  datasets: [{
-    label: 'Activities',
-    data: [0, 0, 0, 0, 0, 0, 0],
-    backgroundColor: '#4F46E5'
-  }]
-};
-
-const chartOptions = {
-  responsive: true,
-  maintainAspectRatio: false
-};
-
-const fetchIPDashboardData = async () => {
-  try {
-    isLoading.value = true;
-    const response = await api.get('http://localhost:8000/api/ip-addresses/dashboard');
-    stats.value.total_ip_addresses = response.data.stats.total_ip_addresses;
-
-    ipTypeData = {
-        labels: ['IPv4', 'IPv6'],
-        datasets: [{
-            data: [response.data.charts.ip_types?.ipv4 || 0, response.data.charts.ip_types?.ipv6 || 0],
-            backgroundColor: ['#4F46E5', '#10B981']
-        }]
-    };
-
-    ipTrendData = {
-        labels: response.data.charts.ip_trend.labels,
-        datasets: [{
-            label: 'IP Addresses',
-            data: response.data.charts.ip_trend.data,
-            borderColor: '#4F46E5',
-            tension: 0.4,
-            fill: false
-        }]
-    };
-  } catch (error) {
-    console.error('Error fetching dashboard data:', error);
-  } finally {
-    isLoading.value = false;
-  }
-};
-
-const fetchUserDashboardData = async () => {
-  try {
-    isLoading.value = true;
-    const response = await api.get('http://localhost:8000/api/auth/dashboard');
-    stats.value.total_users = response.data.stats.total_users;
-  } catch (error) {
-    console.error('Error fetching dashboard data:', error);
-  } finally {
-    isLoading.value = false;
-  }
-};
-
-const fetchAuditDashboardData = async () => {
-  try {
-    isLoading.value = true;
-    const response = await api.get('http://localhost:8000/api/logs/dashboard');
-    stats.value.activities_today = response.data.stats.activities_today;
-
-    let weekBreakdown = response.data.charts.week_breakdown;
-
-    activityData = {
-        labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
-        datasets: [{
-            label: 'Activities',
-            data: [weekBreakdown.Monday, weekBreakdown.Tuesday, weekBreakdown.Wednesday, weekBreakdown.Thursday, weekBreakdown.Friday, weekBreakdown.Saturday, weekBreakdown.Sunday],
-            backgroundColor: '#4F46E5'
-        }]
-    };
-  } catch (error) {
-    console.error('Error fetching dashboard data:', error);
-  } finally {
-    isLoading.value = false;
-  }
-};
-
-onMounted(async () => {
-  await fetchIPDashboardData();
-  await fetchUserDashboardData();
-  await fetchAuditDashboardData();
-});
-</script>
-
 <template>
-    <Navbar />
+  <Navbar />
   <div class="min-h-screen bg-gray-50 pt-16">
     <Sidebar />
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-16">
@@ -154,7 +9,6 @@ onMounted(async () => {
           <p class="mt-2 text-sm text-gray-600">Overview of your IP management system</p>
         </div>
       </div>
-
       <!-- Stats Cards -->
       <div class="mt-8 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
         <div class="bg-white overflow-hidden shadow-sm ring-black ring-opacity-5 rounded-lg">
@@ -174,7 +28,6 @@ onMounted(async () => {
             </div>
           </div>
         </div>
-        
         <div class="bg-white overflow-hidden shadow-sm ring-black ring-opacity-5 rounded-lg">
           <div class="p-5">
             <div class="flex items-center">
@@ -192,7 +45,6 @@ onMounted(async () => {
             </div>
           </div>
         </div>
-        
         <div class="bg-white overflow-hidden shadow-sm ring-black ring-opacity-5 rounded-lg">
           <div class="p-5">
             <div class="flex items-center">
@@ -212,7 +64,6 @@ onMounted(async () => {
           </div>
         </div>
       </div>
-
       <!-- Charts Grid -->
       <div class="mt-8 grid grid-cols-1 gap-6 lg:grid-cols-2">
         <!-- IP Trend Chart -->
@@ -222,7 +73,6 @@ onMounted(async () => {
             <Line :data="ipTrendData" :options="chartOptions" />
           </div>
         </div>
-
         <!-- IP Type Distribution -->
         <div class="bg-white p-6 rounded-lg shadow-sm ring-black ring-opacity-5">
           <h3 class="text-lg font-medium text-gray-900 mb-4">IP Type Distribution</h3>
@@ -230,7 +80,6 @@ onMounted(async () => {
             <Pie :data="ipTypeData" :options="chartOptions" />
           </div>
         </div>
-
         <!-- Activity Chart -->
         <div class="bg-white p-6 rounded-lg shadow-sm ring-black ring-opacity-5 lg:col-span-2">
           <h3 class="text-lg font-medium text-gray-900 mb-4">Weekly Activity</h3>
@@ -241,6 +90,132 @@ onMounted(async () => {
       </div>
     </div>
   </div>
-
   <Loader />
 </template>
+<script setup>
+  import {
+    ref,
+    onMounted
+  } from 'vue';
+  import {
+    Line,
+    Pie,
+    Bar
+  } from 'vue-chartjs';
+  import {
+    Chart as ChartJS,
+    Title,
+    Tooltip,
+    Legend,
+    LineElement,
+    LinearScale,
+    PointElement,
+    CategoryScale,
+    ArcElement,
+    BarElement
+  } from 'chart.js';
+  import api from '../plugins/axios';
+  import Sidebar from './Sidebar.vue';
+  import Navbar from './Navbar.vue';
+  import Loader from './Loader.vue';
+  ChartJS.register(Title, Tooltip, Legend, LineElement, LinearScale, PointElement, CategoryScale, ArcElement, BarElement);
+  const isLoading = ref(false);
+  const stats = ref({
+    'total_ip_addresses': 0,
+    'total_users': 0,
+    'recent_activities': 0
+  });
+  var ipTrendData = {
+    labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+    datasets: [{
+      label: 'IP Addresses',
+      data: [0, 0, 0, 0, 0, 0],
+      borderColor: '#4F46E5',
+      tension: 0.4,
+      fill: false
+    }]
+  };
+  var ipTypeData = {
+    labels: ['IPv4', 'IPv6'],
+    datasets: [{
+      data: [0, 0],
+      backgroundColor: ['#4F46E5', '#10B981']
+    }]
+  };
+  var activityData = {
+    labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+    datasets: [{
+      label: 'Activities',
+      data: [0, 0, 0, 0, 0, 0, 0],
+      backgroundColor: '#4F46E5'
+    }]
+  };
+  const chartOptions = {
+    responsive: true,
+    maintainAspectRatio: false
+  };
+  const fetchIPDashboardData = async () => {
+    try {
+      isLoading.value = true;
+      const response = await api.get('http://localhost:8000/api/ip-addresses/dashboard');
+      stats.value.total_ip_addresses = response.data.stats.total_ip_addresses;
+      ipTypeData = {
+        labels: ['IPv4', 'IPv6'],
+        datasets: [{
+          data: [response.data.charts.ip_types?.ipv4 || 0, response.data.charts.ip_types?.ipv6 || 0],
+          backgroundColor: ['#4F46E5', '#10B981']
+        }]
+      };
+      ipTrendData = {
+        labels: response.data.charts.ip_trend.labels,
+        datasets: [{
+          label: 'IP Addresses',
+          data: response.data.charts.ip_trend.data,
+          borderColor: '#4F46E5',
+          tension: 0.4,
+          fill: false
+        }]
+      };
+    } catch (error) {
+      console.error('Error fetching dashboard data:', error);
+    } finally {
+      isLoading.value = false;
+    }
+  };
+  const fetchUserDashboardData = async () => {
+    try {
+      isLoading.value = true;
+      const response = await api.get('http://localhost:8000/api/auth/dashboard');
+      stats.value.total_users = response.data.stats.total_users;
+    } catch (error) {
+      console.error('Error fetching dashboard data:', error);
+    } finally {
+      isLoading.value = false;
+    }
+  };
+  const fetchAuditDashboardData = async () => {
+    try {
+      isLoading.value = true;
+      const response = await api.get('http://localhost:8000/api/logs/dashboard');
+      stats.value.activities_today = response.data.stats.activities_today;
+      let weekBreakdown = response.data.charts.week_breakdown;
+      activityData = {
+        labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+        datasets: [{
+          label: 'Activities',
+          data: [weekBreakdown.Monday, weekBreakdown.Tuesday, weekBreakdown.Wednesday, weekBreakdown.Thursday, weekBreakdown.Friday, weekBreakdown.Saturday, weekBreakdown.Sunday],
+          backgroundColor: '#4F46E5'
+        }]
+      };
+    } catch (error) {
+      console.error('Error fetching dashboard data:', error);
+    } finally {
+      isLoading.value = false;
+    }
+  };
+  onMounted(async () => {
+    await fetchIPDashboardData();
+    await fetchUserDashboardData();
+    await fetchAuditDashboardData();
+  });
+</script>
