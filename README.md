@@ -44,7 +44,7 @@ Each service is developed using PHP (Laravel framework) and communicates via RES
 
 3. **Access the Application**:
 
-   Navigate to `http://localhost:8000` in your web browser to access the IPAM system UI.
+   Navigate to `http://localhost:80` in your web browser to access the IPAM system UI.
 
 ## Usage
 
