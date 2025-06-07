@@ -53,4 +53,10 @@ class ProxyAuthController extends Controller
         $response = Http::acceptJson()->withToken($request->bearerToken())->get("{$this->baseUrl}/dashboard", $request->all());
         return response($response->json(), $response->status());
     }
+
+    public function refresh(Request $request)
+    {
+        $response = Http::acceptJson()->withToken($request->bearerToken())->get("{$this->baseUrl}/refresh", $request->all());
+        return response($response->json(), $response->status());
+    }
 }

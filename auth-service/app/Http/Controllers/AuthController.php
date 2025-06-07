@@ -80,12 +80,24 @@ class AuthController extends Controller
 
     public function refresh() {
         // Refresh the current JWT token and return a new one in the response
-        return response()->json(['token' => auth()->refresh()]);
+        try {
+            $user = auth()->user();
+
+            $newToken = JWTAuth::invalidate(JWTAuth::getToken());
+            $newToken = JWTAuth::fromUser($user);
+
+            return response()->json([
+                'new_token' => $newToken
+            ]);
+        } catch (\Exception $e) {
+            return response()->json(['error' => 'Token invalid'], 401);
+        }
     }
 
     public function validateToken() {
         try {
             $user = auth()->user();
+
             return response()->json([
                 'valid' => true,
                 'user_id' => $user->id,

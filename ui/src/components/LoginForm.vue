@@ -96,7 +96,6 @@
       console.log(error);
       serverErrors.value = error.response?.data?.errors || {};
       apiError.value = 'Invalid email or password. Please try again.';
-    } finally {
       isLoading.value = false;
     }
   });

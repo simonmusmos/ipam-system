@@ -54,4 +54,30 @@ router.beforeEach((to, _, next) => {
   }
 });
 
+// router.beforeEach(async (to, from, next) => {
+//   const token = localStorage.getItem('token');
+
+//   const publicPages = ['/login', '/register'];
+//   const authRequired = !publicPages.includes(to.path);
+//   console.log(to.path);
+//   // console.log(authRequired);
+//   // if (authRequired) {
+//   //   return next('/login');
+//   // }
+
+//   if (token && authRequired) {
+//     try {
+//       const res = await api.get('http://localhost:8000/api/auth/validate-token');
+//       if (res.data.new_token) {
+//         localStorage.setItem('token', res.data.new_token);
+//       }
+//     } catch (error) {
+//       localStorage.removeItem('token');
+//       if (to.path !== '/login') return next('/login');
+//     }
+//   }
+
+//   return next();
+// });
+
 export default router;

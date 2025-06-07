@@ -36,4 +36,43 @@ const api = axios.create({
     }
   );
   
+  let isRefreshing = false;
+
+  api.interceptors.request.use(async (config) => {
+    if (!isRefreshing) {
+      isRefreshing = true;
+
+      try {
+        const token = localStorage.getItem('token');
+        if (token) {
+          const response = await axios.get('http://localhost:8000/api/auth/refresh', {
+            headers: { Authorization: `Bearer ${token}` },
+          });
+
+          console.log(response.data);
+          const newToken = response.data.new_token;
+
+          if (newToken) {
+            localStorage.setItem('token', newToken);
+            config.headers.Authorization = `Bearer ${newToken}`;
+          }
+        }
+      } catch (error) {
+        console.error('Token refresh failed:', error);
+        localStorage.removeItem('token');
+      } finally {
+        isRefreshing = false;
+      }
+    } else {
+      const token = localStorage.getItem('token');
+      if (token) {
+        config.headers.Authorization = `Bearer ${token}`;
+      }
+    }
+
+    return config;
+  }, (error) => {
+    return Promise.reject(error);
+  });
+
   export default api;
