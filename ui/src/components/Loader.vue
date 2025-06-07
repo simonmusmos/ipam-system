@@ -1,4 +1,4 @@
-<script setup>
+<script setup lang="ts">
   import {
     isLoading
   } from '../stores/loading';

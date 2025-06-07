@@ -95,21 +95,26 @@
     value: password_confirmation
   } = useField('password_confirmation');
   // Emit switch-form
-  const emit = defineEmits(['switch-form']);
+  const emit = defineEmits<{
+    (e: 'switch-form'): void
+  }>();
   // Submit handler
   const onSubmit = handleSubmit(async (values) => {
     isLoading.value = true;
     apiError.value = '';
     serverErrors.value = {};
+    console.log("here");
     try {
-      const response = await axios.post('http://localhost:8000/api/auth/register', {
+      await axios.post('http://localhost:8000/api/auth/register', {
         name: values.name,
         email: values.email,
         password: values.password,
         password_confirmation: values.password_confirmation,
       });
-      registrationSuccess.value = true;
+      (registrationSuccess as any).value = true;
+
       emit('switch-form');
+      
     } catch (error: any) {
       serverErrors.value = error.response?.data?.errors || {};
       apiError.value = error.response?.data?.message || 'Registration failed. Please try again.';

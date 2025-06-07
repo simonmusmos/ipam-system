@@ -65,7 +65,7 @@
                             <li v-for="change in parseChanges(log.changes)" :key="change">{{ change }}</li>
                           </ul>
                         </td>
-                        <td class="px-3 py-4 text-sm text-gray-500">{{ usersCache[log.user_id]?.name || '' }}</td>
+                        <td class="px-3 py-4 text-sm text-gray-500">{{ usersCache[(log.user_id as number)]?.name || '' }}</td>
                         <td class="px-3 py-4 text-sm text-gray-500">{{ formatDate(log.created_at) }}</td>
                       </tr>
                     </tbody>
@@ -111,7 +111,16 @@
   import Sidebar from './Sidebar.vue';
   import Navbar from './Navbar.vue';
   import Loader from './Loader.vue';
-  const auditLogs = ref([]);
+
+  interface AuditLog {
+    id: number | string;
+    description: string;
+    changes: string;
+    user_id: number | string;
+    created_at: string;
+  }
+
+  const auditLogs = ref<AuditLog[]>([]);
   const isLoading = ref(false);
   const isAdmin = ref(false);
   const pagination = ref({

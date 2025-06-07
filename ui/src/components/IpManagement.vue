@@ -68,7 +68,7 @@
                         <td class="whitespace-nowrap py-4 pl-4 pr-3 text-sm text-gray-900">{{ ip.address }}</td>
                         <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-900">{{ ip.label }}</td>
                         <td class="px-3 py-4 text-sm text-gray-500">{{ ip.comment }}</td>
-                        <td class="px-3 py-4 text-sm text-gray-500">{{ usersCache[ip.user_id]?.name || '' }}</td>
+                        <td class="px-3 py-4 text-sm text-gray-500">{{ usersCache[(ip.user_id as number)]?.name || '' }}</td>
                         <td class="px-3 py-4 text-sm text-gray-500">{{ formatDate(ip.created_at) }}</td>
                         <td class="relative whitespace-nowrap py-4 pl-3 pr-4 text-left text-sm font-medium">
                           <button v-if="ip.can_edit" @click="openEditModal(ip)" class="text-indigo-600 hover:text-indigo-900 mr-4 transition-colors duration-200"> Edit </button>
@@ -205,7 +205,7 @@
                         <li v-for="change in parseChanges(log.changes)" :key="change">{{ change }}</li>
                       </ul>
                     </td>
-                    <td class="px-3 py-4 text-sm text-gray-500">{{ usersCache[log.user_id]?.name || '' }}</td>
+                    <td class="px-3 py-4 text-sm text-gray-500">{{ usersCache[(log.user_id as number)]?.name || '' }}</td>
                     <td class="px-3 py-4 text-sm text-gray-500">{{ formatDate(log.created_at) }}</td>
                   </tr>
                 </tbody>
@@ -258,13 +258,37 @@
   import Sidebar from './Sidebar.vue';
   import Navbar from './Navbar.vue';
   import Loader from './Loader.vue';
-  const ipAddresses = ref([]);
-  const auditLogs = ref([]);
+
+  interface IpAddress {
+    id: number | string;
+    address: string;
+    label: string;
+    comment: number | string;
+    created_at: string;
+    user_id: number | string;
+    can_edit: boolean;
+    can_delete: boolean;
+  }
+
+  interface AuditLog {
+    id: number | string;
+    description: string;
+    changes: string;
+    user_id: number | string;
+    created_at: string;
+  }
+
+  interface SelectedIP {
+    id: number | string
+  }
+
+  const ipAddresses = ref<IpAddress[]>([]);
+  const auditLogs = ref<AuditLog[]>([]);
   const isCreateModalOpen = ref(false);
   const isDeleteModalOpen = ref(false);
   const isLogsModalOpen = ref(false);
   const isLoading = ref(false);
-  const selectedIp = ref(null);
+  const selectedIp = ref<SelectedIP[]>([]);
   const formData = ref({
     address: '',
     label: '',
@@ -357,9 +381,9 @@
     try {
       isLoading.value = true;
       if (selectedIp.value) {
-        const response = await api.put("http://localhost:8000/api/ip-addresses/" + selectedIp.value.id, formData.value);
+        await api.put("http://localhost:8000/api/ip-addresses/" + selectedIp.value[0].id, formData.value);
       } else {
-        const response = await api.post("http://localhost:8000/api/ip-addresses", formData.value);
+        await api.post("http://localhost:8000/api/ip-addresses", formData.value);
       }
       isCreateModalOpen.value = false;
     } catch (error: any) {
@@ -377,7 +401,7 @@
     }
     try {
       isLoading.value = true;
-      const response = await api.delete("http://localhost:8000/api/ip-addresses/" + selectedIp.value.id);
+      await api.delete("http://localhost:8000/api/ip-addresses/" + selectedIp.value[0].id);
     } catch (error) {
       console.error('Error deleting IP address:', error);
     } finally {

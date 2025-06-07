@@ -92,7 +92,7 @@
   </div>
   <Loader />
 </template>
-<script setup>
+<script setup lang="ts">
   import {
     ref,
     onMounted
@@ -123,7 +123,7 @@
   const stats = ref({
     'total_ip_addresses': 0,
     'total_users': 0,
-    'recent_activities': 0
+    'activities_today': 0
   });
   var ipTrendData = {
     labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],

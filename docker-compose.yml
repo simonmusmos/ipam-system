@@ -22,6 +22,7 @@ services:
       MYSQL_DATABASE: auth_db
     ports:
       - "33061:3306"
+    command: --innodb-buffer-pool-size=256M --skip-name-resolve
     networks:
       - app-net
 
@@ -33,6 +34,7 @@ services:
       MYSQL_DATABASE: auth_test_db
     ports:
       - "33063:3306"
+    command: --innodb-buffer-pool-size=256M --skip-name-resolve
     networks:
       - app-net
 
@@ -57,6 +59,7 @@ services:
       MYSQL_DATABASE: ip_db
     ports:
       - "33062:3306"
+    command: --innodb-buffer-pool-size=256M --skip-name-resolve
     networks:
       - app-net
 
@@ -68,6 +71,7 @@ services:
       MYSQL_DATABASE: ip_test_db
     ports:
       - "33064:3306"
+    command: --innodb-buffer-pool-size=256M --skip-name-resolve
     networks:
       - app-net
 
@@ -106,9 +110,24 @@ services:
     environment:
       MYSQL_ROOT_PASSWORD: root
       MYSQL_DATABASE: audit_db
+    command: --innodb-buffer-pool-size=256M --skip-name-resolve
+    networks:
+      - app-net
+
+  frontend:
+    build:
+      context: ./ui
+      dockerfile: Dockerfile
+    container_name: frontend
+    ports:
+      - "80:80"
+    volumes:
+      - ./ui:/app
+      - /app/node_modules
     networks:
       - app-net
 
 networks:
   app-net:
     driver: bridge
+    # internal: true
